@@ -74,6 +74,8 @@ pub(crate) struct PurchaseInfo {
 /// What the books give the return builders.
 pub(crate) struct Docs {
     pub outward: Vec<OutwardDoc>,
+    /// Alongside `outward`: the party ledger (for SEZ recipients, GSTR-9).
+    pub outward_party: Vec<Option<LedgerId>>,
     pub inward: Vec<InwardDoc>,
     /// Alongside `inward`.
     pub inward_info: Vec<PurchaseInfo>,
@@ -244,8 +246,10 @@ fn lines(book: &Book, v: &Voucher, party: Option<usize>, rates: &RateSchedule, i
                 "{name}: {ledger_name} is on the party's side; it is not deducted from the taxable value"
             ));
         } else {
-            // A service or sales ledger line: its own HSN/SAC, when set.
-            push(ledger.and_then(|l| l.tax_class.as_deref()), DocLine { taxable_value: signed, ..DocLine::default() }, &mut out, &mut known);
+            // A service or sales ledger line: its own HSN/SAC, when set. On a
+            // purchase, a ledger under Fixed Assets is a capital good (GSTR-9 Table 6).
+            let capital_goods = inward && ledger.is_some_and(|l| is_fixed_asset(book, l.group));
+            push(ledger.and_then(|l| l.tax_class.as_deref()), DocLine { taxable_value: signed, capital_goods, ..DocLine::default() }, &mut out, &mut known);
         }
     }
     if outward_rcm {
@@ -298,6 +302,12 @@ fn lines(book: &Book, v: &Voucher, party: Option<usize>, rates: &RateSchedule, i
     out
 }
 
+/// A ledger group under Fixed Assets (by id: the default groups can be renamed).
+fn is_fixed_asset(book: &Book, group: khata_core::GroupId) -> bool {
+    let fixed = khata_core::GroupId::default_named("Fixed Assets");
+    crate::api::ancestors(book, Some(group)).any(|g| g.id == fixed)
+}
+
 fn collect(book: &Book, from: &str, to: &str) -> ApiResult<Docs> {
     let period = Period { from: parse_date(from)?, to: parse_date(to)? };
     if period.from > period.to {
@@ -332,6 +342,7 @@ pub(crate) fn collect_period(book: &Book, period: Period) -> ApiResult<Docs> {
     let state_name = pack.regions().into_iter().find(|r| r.code == state).map_or(state.clone(), |r| r.name.to_owned());
     let mut d = Docs {
         outward: Vec::new(),
+        outward_party: Vec::new(),
         inward: Vec::new(),
         inward_info: Vec::new(),
         period,
@@ -364,6 +375,7 @@ pub(crate) fn collect_period(book: &Book, period: Period) -> ApiResult<Docs> {
             if region.is_none() && !v.cancelled {
                 assumed_local += 1;
             }
+            d.outward_party.push(party.map(|i| v.entries[i].ledger));
             d.outward.push(OutwardDoc {
                 id,
                 kind: if v.kind == VoucherKind::Sales { DocKind::Invoice } else { DocKind::CreditNote },

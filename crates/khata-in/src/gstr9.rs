@@ -30,7 +30,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use chrono::{Datelike, NaiveDate};
 use rust_decimal::Decimal;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use serde_json::{Map, Value, json};
 
 use crate::gstr2b;
@@ -131,7 +131,7 @@ const fn total(id: &'static str, table: &'static str, label: &'static str, formu
     RowDef { id, table, label, source: Source::Total, formula, note: "" }
 }
 
-use Source::{Books, Manual, Portal};
+use Source::{Books, Manual};
 
 /// A table of the form.
 #[derive(Debug, Clone, Copy)]
@@ -175,7 +175,8 @@ pub const ROWS: &[RowDef] = &[
     noted("4E", "4", "Deemed exports", Manual, "The books do not mark deemed exports"),
     noted("4F", "4", "Advances on which tax was paid but no invoice was issued", Manual, NOT_IN_BOOKS),
     row("4G", "4", "Inward supplies on which tax is paid on reverse charge", Books),
-    total("4H", "4", "Subtotal (A to G)", &[("4A", 1), ("4B", 1), ("4C", 1), ("4D", 1), ("4E", 1), ("4F", 1), ("4G", 1)]),
+    noted("4G1", "4", "Supplies on which an e-commerce operator pays tax under section 9(5) (operator)", Manual, "The books do not mark supplies through an e-commerce operator"),
+    total("4H", "4", "Subtotal (A to G1)", &[("4A", 1), ("4B", 1), ("4C", 1), ("4D", 1), ("4E", 1), ("4F", 1), ("4G", 1), ("4G1", 1)]),
     row("4I", "4", "Credit notes for B to E (−)", Books),
     row("4J", "4", "Debit notes for B to E (+)", Books),
     noted("4K", "4", "Supplies and tax declared through amendments (+)", Manual, NOT_IN_BOOKS),
@@ -186,20 +187,21 @@ pub const ROWS: &[RowDef] = &[
     row("5A", "5", "Exports without payment of tax", Books),
     row("5B", "5", "Supplies to SEZs without payment of tax", Books),
     noted("5C", "5", "Supplies on which the recipient pays tax on reverse charge", Manual, "The books do not mark outward supplies on reverse charge"),
+    noted("5C1", "5", "Supplies through an e-commerce operator who pays tax under section 9(5) (supplier)", Manual, "The books do not mark supplies through an e-commerce operator"),
     noted("5D", "5", "Exempted supplies", Manual, "The books do not tell nil rated, exempt and non-GST supplies apart: every 0% line is in 5E"),
     noted("5E", "5", "Nil rated supplies", Books, "Every 0% line in the books; move exempt and non-GST supplies to 5D and 5F"),
     noted("5F", "5", "Non-GST supplies (including no supply)", Manual, "The books do not tell nil rated, exempt and non-GST supplies apart: every 0% line is in 5E"),
-    total("5G", "5", "Subtotal (A to F)", &[("5A", 1), ("5B", 1), ("5C", 1), ("5D", 1), ("5E", 1), ("5F", 1)]),
+    total("5G", "5", "Subtotal (A to F)", &[("5A", 1), ("5B", 1), ("5C", 1), ("5C1", 1), ("5D", 1), ("5E", 1), ("5F", 1)]),
     row("5H", "5", "Credit notes for A to F (−)", Books),
     row("5I", "5", "Debit notes for A to F (+)", Books),
     noted("5J", "5", "Supplies declared through amendments (+)", Manual, NOT_IN_BOOKS),
     noted("5K", "5", "Supplies reduced through amendments (−)", Manual, NOT_IN_BOOKS),
     total("5L", "5", "Subtotal (H to K)", &[("5H", -1), ("5I", 1), ("5J", 1), ("5K", -1)]),
     total("5M", "5", "Turnover on which tax is not payable (G + L)", &[("5G", 1), ("5L", 1)]),
-    total("5N", "5", "Total turnover, including advances (4N + 5M − 4G)", &[("4N", 1), ("5M", 1), ("4G", -1)]),
+    total("5N", "5", "Total turnover, including advances (4N + 5M − 4G − 4G1)", &[("4N", 1), ("5M", 1), ("4G", -1), ("4G1", -1)]),
     // Table 6
     noted("6A", "6", "Total ITC availed through GSTR-3B (Table 4A)", Books, "The books' own figure; the portal fills it from the GSTR-3B returns filed"),
-    noted("6A1", "6", "ITC of the previous year availed in this year", Manual, NOT_IN_BOOKS),
+    noted("6A1", "6", "ITC of the previous year availed in this year (included in A)", Manual, NOT_IN_BOOKS),
     noted("6A2", "6", "Net ITC of this year (A − A1)", Source::Total, ""),
     row("6B-IP", "6", "Other inward supplies: inputs", Books),
     row("6B-CG", "6", "Other inward supplies: capital goods", Books),
@@ -214,12 +216,12 @@ pub const ROWS: &[RowDef] = &[
     noted("6E-CG", "6", "Import of goods (including from SEZs): capital goods", Books, "Purchases from suppliers abroad that carry IGST; bills of entry are not in the books"),
     noted("6F", "6", "Import of services (other than from SEZs)", Books, "Reverse-charge purchases from suppliers abroad"),
     noted("6G", "6", "ITC received from an Input Service Distributor", Manual, NOT_IN_BOOKS),
-    noted("6H", "6", "ITC reclaimed (other than B above)", Manual, NOT_IN_BOOKS),
+    noted("6H", "6", "ITC reclaimed", Manual, NOT_IN_BOOKS),
     total("6I", "6", "Subtotal (B to H)", &[
         ("6B-IP", 1), ("6B-CG", 1), ("6B-IS", 1), ("6C-IP", 1), ("6C-CG", 1), ("6C-IS", 1), ("6D-IP", 1), ("6D-CG", 1), ("6D-IS", 1),
         ("6E-IP", 1), ("6E-CG", 1), ("6F", 1), ("6G", 1), ("6H", 1),
     ]),
-    total("6J", "6", "Difference (I − A)", &[("6I", 1), ("6A", -1)]),
+    total("6J", "6", "Difference (I − A; from FY 2024-25, I − A2)", &[("6I", 1), ("6A", -1)]),
     noted("6K", "6", "Transition credit through TRAN-1", Manual, NOT_IN_BOOKS),
     noted("6L", "6", "Transition credit through TRAN-2", Manual, NOT_IN_BOOKS),
     noted("6M", "6", "Any other ITC availed", Manual, NOT_IN_BOOKS),
@@ -227,8 +229,8 @@ pub const ROWS: &[RowDef] = &[
     total("6O", "6", "Total ITC availed (I + N)", &[("6I", 1), ("6N", 1)]),
     // Table 7
     noted("7A", "7", "Rule 37 (supplier not paid within 180 days)", Books, "From the Rule 37 report: reversals falling due in the year"),
-    noted("7A1", "7", "Rule 37 (supplier not paid within 180 days)", Books, "From the Rule 37 report: reversals falling due in the year"),
-    noted("7A2", "7", "Rule 37A (supplier did not file GSTR-3B)", Manual, NOT_IN_BOOKS),
+    noted("7A1", "7", "Rule 37A (supplier did not pay the tax through GSTR-3B)", Manual, NOT_IN_BOOKS),
+    noted("7A2", "7", "Rule 38 (banking companies and financial institutions)", Manual, NOT_IN_BOOKS),
     noted("7B", "7", "Rule 39 (Input Service Distributor)", Manual, NOT_IN_BOOKS),
     noted("7C", "7", "Rule 42 (inputs and input services for exempt supplies)", Manual, "Work it out with the Rule 42 calculator and enter it"),
     noted("7D", "7", "Rule 43 (capital goods for exempt supplies)", Manual, NOT_IN_BOOKS),
@@ -239,15 +241,16 @@ pub const ROWS: &[RowDef] = &[
     total("7I", "7", "Total ITC reversed (A to H)", &[("7A", 1), ("7A1", 1), ("7A2", 1), ("7B", 1), ("7C", 1), ("7D", 1), ("7E", 1), ("7F", 1), ("7G", 1), ("7H", 1)]),
     total("7J", "7", "Net ITC available for use (6O − 7I)", &[("6O", 1), ("7I", -1)]),
     // Table 8
-    noted("8A", "8", "ITC as per GSTR-2B", Portal, "Only the portal knows it: import the GSTR-9 or GSTR-2B files, or enter it"),
-    total("8B", "8", "ITC as per 6B and 6H", &[("6B-IP", 1), ("6B-CG", 1), ("6B-IS", 1), ("6H", 1)]),
+    noted("8A", "8", "ITC as per GSTR-2B", Source::Portal, "Only the portal knows it: import the GSTR-9 or GSTR-2B files, or enter it"),
+    total("8B", "8", "ITC as per 6B and 6H (from FY 2024-25, 6B only)", &[("6B-IP", 1), ("6B-CG", 1), ("6B-IS", 1), ("6H", 1)]),
     noted("8C", "8", "ITC on inward supplies of this year availed in the next year", Manual, NOT_IN_BOOKS),
     total("8D", "8", "Difference A − (B + C)", &[("8A", 1), ("8B", -1), ("8C", -1)]),
     noted("8E", "8", "ITC available but not availed", Manual, NOT_IN_BOOKS),
     noted("8F", "8", "ITC available but ineligible", Manual, NOT_IN_BOOKS),
     noted("8G", "8", "IGST paid on import of goods (including from SEZs)", Manual, "Bills of entry are not in the books: import GSTR-2B or enter it"),
     total("8H", "8", "IGST credit availed on import of goods (6E)", &[("6E-IP", 1), ("6E-CG", 1)]),
-    total("8I", "8", "Difference (G − H)", &[("8G", 1), ("8H", -1)]),
+    noted("8H1", "8", "IGST credit on import of goods availed in the next year (out of G)", Manual, NOT_IN_BOOKS),
+    total("8I", "8", "Difference (G − H; from FY 2024-25, G − (H + H1))", &[("8G", 1), ("8H", -1), ("8H1", -1)]),
     total("8J", "8", "ITC available but not availed on import of goods (I)", &[("8I", 1)]),
     total("8K", "8", "Total ITC to lapse this year (E + F + J)", &[("8E", 1), ("8F", 1), ("8J", 1)]),
     // Table 9: payable from 4N; payments entered.
@@ -280,8 +283,8 @@ pub const ROWS: &[RowDef] = &[
     noted("16A", "16", "Supplies received from composition taxpayers", Manual, NOT_IN_BOOKS),
     noted("16B", "16", "Deemed supply under section 143 (job work)", Manual, NOT_IN_BOOKS),
     noted("16C", "16", "Goods sent on approval and not returned", Manual, NOT_IN_BOOKS),
-    noted("19-CAMT", "19", "Central Tax", Manual, NOT_IN_BOOKS),
-    noted("19-SAMT", "19", "State Tax", Manual, NOT_IN_BOOKS),
+    noted("19-CAMT", "19", "Central Tax", Manual, "The portal works out the late fee; enter it to keep a record"),
+    noted("19-SAMT", "19", "State Tax", Manual, "The portal works out the late fee; enter it to keep a record"),
     // GSTR-9C Part A (groundwork): Table 5, reconciliation of gross turnover.
     noted("9C-5A", "9C-5", "Turnover (including exports) as per the audited financial statements", Books, "Sales accounts in the profit and loss account for the year"),
     noted("9C-5B", "9C-5", "Unbilled revenue at the beginning of the year (+)", Manual, NOT_IN_BOOKS),
@@ -314,13 +317,13 @@ pub const ROWS: &[RowDef] = &[
 ];
 
 /// The financial years (by the year they start) a row is on the form,
-/// both ends inclusive; `None`: every year. FY 2024-25 split 6A into 6A1
-/// and 6A2 and 7A into 7A1 and 7A2 (Notif. 13/2025-CT; see the research
-/// note for what is settled).
+/// both ends inclusive; `None`: every year. Notif. 12/2024-CT added 4G1
+/// and 5C1 from FY 2023-24; Notif. 13/2025-CT added 6A1, 6A2, 7A1 (Rule
+/// 37A), 7A2 (Rule 38) and 8H1 from FY 2024-25 (`docs/research/india-gstr9.md`).
 pub fn row_years(id: &str) -> (Option<i32>, Option<i32>) {
     match id {
-        "6A1" | "6A2" | "7A1" | "7A2" => (Some(2024), None),
-        "7A" => (None, Some(2023)),
+        "4G1" | "5C1" => (Some(2023), None),
+        "6A1" | "6A2" | "7A1" | "7A2" | "8H1" => (Some(2024), None),
         _ => (None, None),
     }
 }
@@ -330,10 +333,13 @@ fn on_form(id: &str, fy_start: i32) -> bool {
     from.is_none_or(|f| fy_start >= f) && to.is_none_or(|t| fy_start <= t)
 }
 
-/// The years' extra totals: 6A2 = 6A − 6A1.
-fn formula_for(def: &RowDef) -> &'static [(&'static str, i8)] {
+/// Totals that change with the year: 6A2 = 6A − 6A1; from FY 2024-25 6J
+/// is I − A2 and 8B takes 6B only (Notif. 13/2025-CT).
+fn formula_for(def: &RowDef, fy_start: i32) -> &'static [(&'static str, i8)] {
     match def.id {
         "6A2" => &[("6A", 1), ("6A1", -1)],
+        "6J" if fy_start >= 2024 => &[("6I", 1), ("6A2", -1)],
+        "8B" if fy_start >= 2024 => &[("6B-IP", 1), ("6B-CG", 1), ("6B-IS", 1)],
         _ => def.formula,
     }
 }
@@ -448,10 +454,10 @@ impl Gstr9 {
 }
 
 /// What the app gives the builder, beyond the documents.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct Gstr9Input<'a> {
-    /// The financial year, 1 April to 31 March.
-    pub period: Option<Period>,
+    /// The financial year, 1 April to 31 March ([`fy_period`]).
+    pub period: Period,
     pub supplier_state: &'a str,
     pub outward: &'a [OutwardDoc],
     pub inward: &'a [InwardDoc],
@@ -541,29 +547,37 @@ pub fn applicability(fy_start: i32, turnover: Decimal) -> Vec<String> {
     let mut out = Vec::new();
     if turnover <= crore(2) {
         out.push(
-            "Turnover in the books is up to ₹2 crore: GSTR-9 is optional for this year if the aggregate turnover across all GSTINs on the PAN is too (Notif. 15/2025-CT and earlier exemptions)".into(),
+            "Turnover in the books is up to ₹2 crore: GSTR-9 is optional if the aggregate turnover of all GSTINs on the PAN is too (yearly notifications; Notif. 15/2025-CT from FY 2024-25)".into(),
         );
     }
     if turnover <= crore(5) {
-        out.push(
-            "Up to ₹5 crore aggregate turnover, HSN codes need 4 digits, and several rows may be left out or reported together: 5D, 5E and 5F together; 6B, 6C, 6D and 6E as inputs only or in total; 7A to 7E together; 8C to 8K; Tables 12, 13, 15, 16, 17 and 18 (as notified for each year)".into(),
-        );
+        out.push("Up to ₹5 crore aggregate turnover, Tables 17 and 18 need HSN codes of at least 4 digits".into());
     } else {
-        out.push("Above ₹5 crore aggregate turnover, HSN codes need 6 digits; GSTR-9C (self-certified reconciliation) is due with GSTR-9".into());
+        out.push("Above ₹5 crore aggregate turnover, Tables 17 and 18 need 6-digit HSN codes, and GSTR-9C (self-certified reconciliation) is filed with GSTR-9".into());
+    }
+    match fy_start {
+        2021..=2023 => out.push(
+            "Options notified for this year (up to ₹5 crore where so limited): 5D and 5E together (5F separately); 5H to 5K netted; 6B to 6E without the split; 7A to 7E in 7H; Tables 12, 13, 15, 16 and 18 may be left out".into(),
+        ),
+        2024 => out.push(
+            "Options notified for FY 2024-25: 5D and 5E together; 5H to 5K netted; 6B to 6D without the inputs and input services split; Tables 15, 16 and 18 may be left out. 6E, 7A to 7E, 12 and 13 must be reported".into(),
+        ),
+        y if y >= 2025 => out.push("No GSTR-9 options were found notified for this year yet: check the portal before leaving any table out".into()),
+        _ => {}
     }
     if fy_start >= 2023 {
-        out.push("Table 8A comes from GSTR-2B from FY 2023-24 (GSTR-2A before)".into());
+        out.push("Table 8A comes from GSTR-2B from FY 2023-24 (GSTR-2A before), and the portal fills it; 6A and the paid columns of Table 9 are locked on the portal".into());
     }
     if fy_start >= 2024 {
-        out.push("From FY 2024-25, 6A1 and 6A2 split out ITC of the previous year availed in this year, and 7A splits into Rule 37 (7A1) and Rule 37A (7A2)".into());
+        out.push("From FY 2024-25: 6A1 and 6A2 (previous year's ITC availed this year), 7A1 (Rule 37A), 7A2 (Rule 38) and 8H1 are new rows, and 8B takes 6B only".into());
     }
-    out.push("Due by 31 December after the year (Rule 80). Late fee: section 47 as reduced by Notif. 7/2023-CT; enter it in Table 19".into());
+    out.push("Due by 31 December after the year (Rule 80). The portal works out the late fee (section 47, reduced by Notif. 7/2023-CT)".into());
     out
 }
 
 /// Work out GSTR-9 from the year's documents and the hand entries.
 pub fn gstr9(input: &Gstr9Input<'_>, entries: &Entries) -> Gstr9 {
-    let period = input.period.unwrap_or_else(|| fy_period(Decimal::ZERO.to_string().len() as i32 + 2024));
+    let period = input.period;
     let fy_start = if period.from.month() >= 4 { period.from.year() } else { period.from.year() - 1 };
     let state = input.supplier_state;
     let mut warnings: Vec<String> = Vec::new();
@@ -681,23 +695,19 @@ pub fn gstr9(input: &Gstr9Input<'_>, entries: &Entries) -> Gstr9 {
     acc.rows.insert("6A", Amounts { taxable: Decimal::ZERO, ..a6 });
     let mut docs6a: BTreeMap<String, DocRef> = BTreeMap::new();
     for k in ["6B-IP", "6B-CG", "6B-IS", "6C-IP", "6C-CG", "6C-IS", "6D-IP", "6D-CG", "6D-IS", "6F"] {
-        for (id, d) in acc.docs.get(k).into_iter().flatten() {
-            docs6a.entry(id.clone()).or_insert_with(|| d.clone()).amounts.add(&Amounts::default());
+        for d in acc.docs.get(k).into_iter().flat_map(BTreeMap::values) {
+            docs6a.entry(d.id.clone()).or_insert_with(|| DocRef { amounts: Amounts::default(), ..d.clone() }).amounts.add(&d.amounts);
         }
     }
     acc.docs.insert("6A".into(), docs6a);
-    let rule37_row = if on_form("7A1", fy_start) { "7A1" } else { "7A" };
     if !input.rule37.tax().is_zero() {
-        acc.rows.insert(rule37_row, Amounts { taxable: Decimal::ZERO, ..input.rule37 });
+        acc.rows.insert("7A", Amounts { taxable: Decimal::ZERO, ..input.rule37 });
     }
     if let Some(t) = input.books_turnover {
         acc.rows.insert("9C-5A", Amounts { taxable: t, ..Amounts::default() });
     }
-    // Cross-checks with GSTR-3B: the same rules, so the same figures.
-    debug_assert_eq!(acc.rows.get("4G").copied().unwrap_or_default(), g3.reverse_charge_inward);
-
     let mut docs: BTreeMap<String, Vec<DocRef>> =
-        acc.docs.into_iter().map(|(k, v)| (k, v.into_values().filter(|d| !d.id.is_empty()).collect())).collect();
+        acc.docs.into_iter().map(|(k, v)| (k, v.into_values().collect())).collect();
 
     // Work out every row: books, entries, then totals in the form's order.
     let mut values: BTreeMap<&'static str, BTreeMap<&'static str, Decimal>> = BTreeMap::new();
@@ -706,7 +716,7 @@ pub fn gstr9(input: &Gstr9Input<'_>, entries: &Entries) -> Gstr9 {
         let keys = t.cols.keys();
         let mut rows = Vec::new();
         for def in ROWS.iter().filter(|r| r.table == t.id && on_form(r.id, fy_start)) {
-            let formula = formula_for(def);
+            let formula = formula_for(def, fy_start);
             let source = if formula.is_empty() { def.source } else { Source::Total };
             let books: Option<Vec<Decimal>> = match source {
                 Source::Total => None,
@@ -799,7 +809,7 @@ pub fn gstr9(input: &Gstr9Input<'_>, entries: &Entries) -> Gstr9 {
 /// columns. Zero columns are kept (an entry of zero overrides the books).
 pub fn check_entry(id: &str, values: &BTreeMap<String, Decimal>) -> Result<(), String> {
     let def = ROWS.iter().find(|r| r.id == id).ok_or_else(|| format!("{id} is not a row of GSTR-9"))?;
-    if def.source == Source::Total || !formula_for(def).is_empty() {
+    if def.source == Source::Total || !formula_for(def, 2017).is_empty() || def.id == "6A2" {
         return Err(format!("{id} is a total; it is worked out from other rows"));
     }
     let keys = table_def(def.table).cols.keys();
@@ -823,6 +833,7 @@ pub const JSON_ROWS: &[(&str, &str, &str, Option<&str>)] = &[
     ("4E", "table4", "deemed", None),
     ("4F", "table4", "at", None),
     ("4G", "table4", "rchrg", None),
+    ("4G1", "table4", "ecom", None),
     ("4H", "table4", "sub_totalAG", None),
     ("4I", "table4", "cr_nt", None),
     ("4J", "table4", "dr_nt", None),
@@ -833,6 +844,7 @@ pub const JSON_ROWS: &[(&str, &str, &str, Option<&str>)] = &[
     ("5A", "table5", "zero_rtd", None),
     ("5B", "table5", "sez", None),
     ("5C", "table5", "rchrg", None),
+    ("5C1", "table5", "ecom_14", None),
     ("5D", "table5", "exmt", None),
     ("5E", "table5", "nil", None),
     ("5F", "table5", "non_gst", None),
@@ -845,8 +857,6 @@ pub const JSON_ROWS: &[(&str, &str, &str, Option<&str>)] = &[
     ("5M", "table5", "tover_tax_np", None),
     ("5N", "table5", "total_tover", None),
     ("6A", "table6", "itc_3b", None),
-    ("6A1", "table6", "itc_3b_prev_fy", None),
-    ("6A2", "table6", "itc_3b_net", None),
     ("6B-IP", "table6", "supp_non_rchrg", Some("ip")),
     ("6B-CG", "table6", "supp_non_rchrg", Some("cg")),
     ("6B-IS", "table6", "supp_non_rchrg", Some("is")),
@@ -869,8 +879,6 @@ pub const JSON_ROWS: &[(&str, &str, &str, Option<&str>)] = &[
     ("6N", "table6", "sub_totalKM", None),
     ("6O", "table6", "total_itc_availed", None),
     ("7A", "table7", "rule37", None),
-    ("7A1", "table7", "rule37", None),
-    ("7A2", "table7", "rule37a", None),
     ("7B", "table7", "rule39", None),
     ("7C", "table7", "rule42", None),
     ("7D", "table7", "rule43", None),
@@ -918,9 +926,12 @@ pub const JSON_ROWS: &[(&str, &str, &str, Option<&str>)] = &[
     ("16A", "table16", "comp_supp", None),
     ("16B", "table16", "deemed_supp", None),
     ("16C", "table16", "not_returned", None),
-    ("19-CAMT", "table19", "camt", None),
-    ("19-SAMT", "table19", "samt", None),
 ];
+
+/// Rows on the form whose JSON keys no public source shows: they are left
+/// out of [`gstr9_json`] (enter them in the offline tool). Table 19 has no
+/// key either: the portal works out the late fee.
+pub const JSON_UNKNOWN: &[&str] = &["6A1", "6A2", "7A1", "7A2", "8H1", "19-CAMT", "19-SAMT"];
 
 /// Key aliases seen in portal files for the same row (older or newer
 /// spellings), read by [`parse_portal`] only.
@@ -1105,7 +1116,7 @@ pub fn hsn_csv_gstr1(rows: &[returns::HsnRow]) -> String {
 // --------------------------------------------------- portal files (import)
 
 /// What kind of portal file was read.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub enum PortalKind {
     Gstr9,
     Gstr1,
@@ -1258,7 +1269,6 @@ fn read_gstr9(root: &Value, rows: &mut BTreeMap<String, BTreeMap<String, Decimal
         let figures: BTreeMap<String, Decimal> = keys.iter().map(|k| ((*k).to_owned(), field(node, &[k]))).collect();
         rows.insert(id.to_owned(), figures);
     }
-    // 7A and 7A1 are the same key: keep the one this year has.
     if let Some(items) = root.get("table17").and_then(|t| t.get("items")).and_then(Value::as_array) {
         portal.hsn_outward = Some(hsn_from_items(&items.iter().collect::<Vec<_>>(), "17"));
     }
@@ -1468,11 +1478,6 @@ pub fn parse_portal(files: &[(String, String)], fy_start: i32) -> Result<Portal,
             p.row_kinds.insert(id.clone(), kind);
             p.rows.insert(id, figures);
         }
-    }
-    // 7A and 7A1 share a key: give the figure to the row this year has.
-    let rule37 = if on_form("7A1", fy_start) { ("7A", "7A1") } else { ("7A1", "7A") };
-    if let Some(v) = p.rows.remove(rule37.0) {
-        p.rows.entry(rule37.1.into()).or_insert(v);
     }
     if p.hsn_outward.is_none() && !hsn1.is_empty() {
         p.hsn_outward = Some(hsn_from_items(&hsn1.iter().collect::<Vec<_>>(), "17"));
@@ -1747,7 +1752,7 @@ mod tests {
 
     fn input<'a>(outward: &'a [OutwardDoc], inward: &'a [InwardDoc]) -> Gstr9Input<'a> {
         Gstr9Input {
-            period: Some(fy_period(2025)),
+            period: fy_period(2025),
             supplier_state: MH,
             outward,
             inward,
@@ -1793,13 +1798,13 @@ mod tests {
         assert_eq!(v(&g, "6F", "iamt"), dec!(3600));
         assert_eq!(v(&g, "6A", "iamt"), dec!(10800) + dec!(149000) + dec!(1800) + dec!(3600));
         assert_eq!(v(&g, "6J", "iamt"), dec!(0), "the books' 6A is 6B to 6F");
-        // Table 7: Rule 37 (7A1 from FY 2024-25) and blocked credit.
-        assert!(g.row("7A").is_none() && g.row("7A1").is_some());
-        assert_eq!(v(&g, "7A1", "iamt"), dec!(900));
+        // Table 7: Rule 37 and blocked credit; 7A1 (Rule 37A) and 7A2 (Rule 38) are entered.
+        assert_eq!(g.row("7A1").unwrap().source, Source::Manual);
+        assert_eq!(v(&g, "7A", "iamt"), dec!(900));
         assert_eq!(v(&g, "7E", "iamt"), dec!(140000));
         assert_eq!(v(&g, "7I", "iamt"), dec!(140900));
         assert_eq!(v(&g, "7J", "iamt"), v(&g, "6O", "iamt") - dec!(140900));
-        // Table 8: B from 6B; A is the portal's.
+        // Table 8: B from 6B (only 6B from FY 2024-25); A is the portal's.
         assert_eq!(v(&g, "8B", "iamt"), dec!(10800) + dec!(149000) + dec!(1800));
         assert_eq!(v(&g, "8D", "iamt"), -v(&g, "8B", "iamt"));
         // Table 9: payable from 4N.
@@ -1858,7 +1863,7 @@ mod tests {
             ("998313", "OTH", dec!(18), dec!(0), dec!(10000)),
         ]);
         assert_eq!(g.hsn_digits, 4);
-        assert!(g.warnings.iter().any(|w| w.contains("Table 17") || w.contains("Table 18")) == false, "{:?}", g.warnings);
+        assert!(!g.warnings.iter().any(|w| w.contains("Table 17") || w.contains("Table 18")), "{:?}", g.warnings);
         // A 6-digit requirement flags 4-digit codes.
         let mut inp = input(&o, &i);
         inp.hsn_digits = Some(6);
@@ -1901,16 +1906,30 @@ mod tests {
     fn rows_follow_the_year() {
         let (o, i) = books();
         let mut inp = input(&o, &i);
-        inp.period = Some(fy_period(2023));
+        inp.period = fy_period(2023);
         let g = gstr9(&inp, &Entries::new());
-        assert!(g.row("7A").is_some() && g.row("7A1").is_none() && g.row("6A1").is_none());
+        assert!(g.row("4G1").is_some() && g.row("7A1").is_none() && g.row("6A1").is_none() && g.row("8H1").is_none());
         assert_eq!(g.fy, "2023-24");
+        inp.period = fy_period(2022);
+        let mut e = Entries::new();
+        e.insert("6H".into(), [("iamt".to_owned(), dec!(50))].into());
+        let g22 = gstr9(&inp, &e);
+        assert!(g22.row("4G1").is_none() && g22.row("5C1").is_none());
+        assert_eq!(v(&g22, "8B", "iamt"), dec!(50), "6H counts in 8B before FY 2024-25");
         // Nothing of the FY 2025-26 books falls in 2023-24, except the Rule 37 figure given.
         assert_eq!((v(&g, "4N", "txval"), v(&g, "7A", "iamt")), (dec!(0), dec!(900)));
         let mut e = Entries::new();
         e.insert("6A1".into(), [("iamt".to_owned(), dec!(100))].into());
+        e.insert("6H".into(), [("iamt".to_owned(), dec!(50))].into());
+        e.insert("8H1".into(), [("iamt".to_owned(), dec!(7))].into());
+        e.insert("4G1".into(), [("txval".to_owned(), dec!(1000))].into());
         let g = gstr9(&input(&o, &i), &e);
         assert_eq!(v(&g, "6A2", "iamt"), v(&g, "6A", "iamt") - dec!(100));
+        assert_eq!(v(&g, "6J", "iamt"), dec!(150), "I − A2: 6H (50) and 6A1 (100)");
+        assert_eq!(v(&g, "8B", "iamt"), dec!(161600), "6B only");
+        assert_eq!(v(&g, "8I", "iamt"), dec!(-7));
+        assert_eq!(v(&g, "5N", "txval"), dec!(226500), "4G1 is in 4N and taken out again");
+        assert!(check_entry("6A2", &BTreeMap::new()).is_err());
     }
 
     #[test]
@@ -1928,6 +1947,10 @@ mod tests {
         assert_eq!(t6[0]["iamt"], json!(10800.0));
         assert!(t6[0].get("txval").is_none(), "ITC rows carry taxes only");
         assert_eq!(j["table7"]["rule37"]["iamt"], json!(900.0));
+        assert!(j.get("table19").is_none() && j["table6"].get("6A1").is_none());
+        for id in JSON_UNKNOWN {
+            assert!(!JSON_ROWS.iter().any(|r| r.0 == *id), "{id}");
+        }
         assert_eq!(j["table9"]["iamt"]["txpyble"], json!(23400.0));
         assert_eq!(j["table17"]["items"][2]["hsn_sc"], "847130");
         assert_eq!(j["table17"]["items"][2]["qty"], json!(3.0));

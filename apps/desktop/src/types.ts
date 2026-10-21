@@ -2411,6 +2411,124 @@ export interface Gstr2bRecon {
   warnings: string[];
 }
 
+// ------------------- GSTR-9 annual return (India; src-tauri gstr9.rs)
+
+/** Where a row's figure comes from. */
+export type Gstr9Source = "books" | "manual" | "portal" | "total";
+
+export interface Gstr9Row {
+  /** "4A", "6B-IP" (inputs), "9-CAMT", "9C-5B". */
+  id: string;
+  label: string;
+  source: Gstr9Source;
+  /** The books' figure by column; null when the books cannot know it. */
+  books: string[] | null;
+  /** Entered by hand, by column. */
+  entered: string[] | null;
+  /** What the return carries. */
+  value: string[];
+  /** Vouchers behind the books' figure. */
+  docs: number;
+  note: string;
+}
+
+export interface Gstr9Table {
+  /** "GSTR-9" or "GSTR-9C". */
+  form: string;
+  /** "4" … "19", "9C-5", "9C-7". */
+  id: string;
+  part: string;
+  title: string;
+  /** Column titles (English) and their keys. */
+  columns: string[];
+  keys: string[];
+  rows: Gstr9Row[];
+}
+
+export interface Gstr9HsnLine {
+  /** Drill-down key. */
+  key: string;
+  hsn: string;
+  uqc: string;
+  qty: string;
+  rate: string;
+  amounts: GstAmounts;
+  docs: number;
+}
+
+export interface Gstr9 {
+  gstin: string | null;
+  state: string;
+  can_edit: boolean;
+  /** "2025-26". */
+  fy: string;
+  fy_start: number;
+  period: { from: string; to: string };
+  tables: Gstr9Table[];
+  /** Table 17. */
+  hsn_outward: Gstr9HsnLine[];
+  /** Table 18. */
+  hsn_inward: Gstr9HsnLine[];
+  hsn_digits: number;
+  turnover: string;
+  notes: string[];
+  warnings: string[];
+}
+
+export interface Gstr9DocRef {
+  id: string;
+  /** A purchase-side document. */
+  inward: boolean;
+  kind: GstDocKind;
+  number: string;
+  date: string;
+  party: string;
+  amounts: GstAmounts;
+}
+
+export type Gstr9ReconStatus = "Matched" | "Differs" | "NotInFiles";
+export type Gstr9PortalKind = "Gstr9" | "Gstr1" | "Gstr3b" | "Gstr2b";
+
+export interface Gstr9ReconLine {
+  table: string;
+  row: string;
+  label: string;
+  column: string;
+  key: string;
+  books: string;
+  portal: string | null;
+  /** Books − portal. */
+  difference: string;
+  status: Gstr9ReconStatus;
+  from: Gstr9PortalKind | null;
+  docs: number;
+}
+
+export interface Gstr9HsnRecon {
+  table: string;
+  hsn: string;
+  rate: string;
+  keys: string[];
+  books: GstAmounts | null;
+  portal: GstAmounts | null;
+  books_qty: string;
+  portal_qty: string;
+  differences: string[];
+  status: Gstr9ReconStatus;
+}
+
+export interface Gstr9Recon {
+  gstin: string | null;
+  other_gstin: boolean;
+  fy: string;
+  files: { name: string; kind: Gstr9PortalKind; period: string | null; gstin: string | null }[];
+  lines: Gstr9ReconLine[];
+  hsn: Gstr9HsnRecon[];
+  matched: number;
+  differs: number;
+  warnings: string[];
+}
+
 // ------------------- Schedule III: divisions, rounding, notes and mapping
 
 /** A statement row as now served: Division I or II items, and "detail" rows (MSME split). */

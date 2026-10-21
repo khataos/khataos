@@ -34,6 +34,8 @@ All of these are in **Go To** (`Alt+G`), under GST. Type part of the name.
 | **GSTR-1 (outward supplies)** | B2B, B2CL, B2CS, credit and debit notes, exports, nil-rated, HSN summary and documents issued | `Ctrl+Alt+J` saves the draft GSTR-1 JSON; `Ctrl+Alt+E` saves e-invoice JSON for the period |
 | **GSTR-3B (summary return)** | Tables 3.1, 3.2 and 4, with tax payable | Print and CSV |
 | **GSTR-2B reconciliation** | Matches your purchases with the GSTR-2B JSON downloaded from the portal | `Alt+S` imports the JSON; `Ctrl+Alt+T` sets the tolerance |
+| **GSTR-9 (annual return) and portal reconciliation** | The annual return for a financial year from your books, with HSN summaries (Tables 17 and 18); rows the books can't know are entered by hand | `F2` changes the year; `Ctrl+Enter` enters a row; `Ctrl+Alt+J` saves the JSON; `Ctrl+Alt+X` saves a table as CSV; `Alt+S` compares with files from the portal; `Ctrl+Alt+C` GSTR-9C |
+| **GSTR-9C turnover reconciliation** | Turnover in your profit and loss account against GSTR-9 (Part A, Tables 5 and 7) | `Ctrl+Enter` enters an adjustment |
 | **Input tax credit (GSTR-3B Table 4)** | ITC available, reversed and ineligible | |
 | **Reverse charge register and self-invoices** | Purchases under reverse charge and their self-invoices | `Ctrl+Alt+P` prints a self-invoice |
 | **Reverse charge and blocked credit flags** | Mark purchases as reverse charge or blocked credit | `Alt+R`, `Alt+B`; `Alt+4` the Rule 42 calculator |
@@ -42,6 +44,16 @@ All of these are in **Go To** (`Alt+G`), under GST. Type part of the name.
 | **MSME overdue payables (over 45 days)** | Supplier bills past 45 days | |
 
 To file GSTR-1: save the JSON with `Ctrl+Alt+J`, open it in the GST offline tool, check it there, and upload it from the tool. The JSON hasn't been checked against the offline tool yet. Detail: [GST returns](../india-gst-returns.md).
+
+In GSTR-1, open an HSN summary section and press `Ctrl+Alt+X` to save Table 12 as CSV.
+
+To prepare GSTR-9:
+
+1. Open **GSTR-9** for the year (or press `Enter` on its due date on the Desk).
+2. Check the tables worked out from the books. `Enter` on a row lists the vouchers behind it.
+3. Enter what the books can't know with `Ctrl+Enter`: amendments, deemed exports, exempt and non-GST supplies, Table 8A, tax paid, refunds and demands. Entries are kept for the company and year, and sync like the rest of the company.
+4. Get the GSTR-9 JSON with the portal's system-computed values through the GST offline tool (the portal's own summary download is a PDF), or the year's GSTR-1, GSTR-3B and GSTR-2B JSON files. Press `Alt+S` and pick them to see books against portal, row by row. KhataOS never connects to the portal.
+5. Save the JSON with `Ctrl+Alt+J` and open it in the GST offline tool. The JSON hasn't been checked against the offline tool yet, so check every table there before you upload.
 
 The [Desk](desk.md) shows the GSTR-1, GSTR-3B and other due dates once you set monthly or quarterly (QRMP) returns in the compliance profile.
 
@@ -74,4 +86,4 @@ Go To, under Statutory: **Balance Sheet (Schedule III)**, **Statement of Profit 
 
 ## Not there yet
 
-Direct filing with the GST portal (through a GSP), GSTR-9 and 9C, the composition scheme (CMP-08, GSTR-4), more than one GSTIN in a company, ITC-04, TDS certificates and challan matching, payroll (PF, ESI, PT), and the Rule 53 number check on credit and debit notes.
+Direct filing with the GST portal (through a GSP), GSTR-9C beyond turnover (tax paid and ITC tables), the composition scheme (CMP-08, GSTR-4), more than one GSTIN in a company, ITC-04, TDS certificates and challan matching, payroll (PF, ESI, PT), and the Rule 53 number check on credit and debit notes.

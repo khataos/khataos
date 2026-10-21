@@ -1736,6 +1736,74 @@ pub fn read_gstr2b_file(app: AppHandle, path: String) -> ApiResult<String> {
     crate::gstr2b::read_json_file(&path)
 }
 
+// ------------------------------------------------------- GSTR-9 (India)
+
+/// GSTR-9 for the financial year starting in April `year` (2025 for 2025-26).
+#[tauri::command(rename_all = "snake_case")]
+pub fn gstr9(state: State<'_, AppState>, year: i32) -> ApiResult<crate::gstr9::Gstr9Dto> {
+    crate::gstr9::gstr9(&*lock(&state)?, year)
+}
+
+/// Save a row's hand entries (column key → amount), or clear them (`values` null or blank).
+#[tauri::command(rename_all = "snake_case")]
+pub fn gstr9_set_row(
+    state: State<'_, AppState>,
+    year: i32,
+    row: String,
+    values: Option<std::collections::BTreeMap<String, String>>,
+) -> ApiResult<crate::gstr9::Gstr9Dto> {
+    crate::gstr9::gstr9_set_row(&mut *lock(&state)?, year, &row, values)
+}
+
+/// The vouchers behind a GSTR-9 row ("4B") or an HSN line's key.
+#[tauri::command(rename_all = "snake_case")]
+pub fn gstr9_docs(state: State<'_, AppState>, year: i32, key: String) -> ApiResult<Vec<khata_in::gstr9::DocRef>> {
+    crate::gstr9::gstr9_docs(&*lock(&state)?, year, &key)
+}
+
+/// GSTR-9 in the GSTN JSON layout (needs validation in the GST offline tool). Save it with write_gst_json.
+#[tauri::command(rename_all = "snake_case")]
+pub fn gstr9_json(state: State<'_, AppState>, year: i32) -> ApiResult<String> {
+    crate::gstr9::gstr9_json(&*lock(&state)?, year)
+}
+
+/// One GSTR-9 table as CSV ("4" … "19", "9C-5", "9C-7", "all"). Save it with write_csv.
+#[tauri::command(rename_all = "snake_case")]
+pub fn gstr9_csv(state: State<'_, AppState>, year: i32, table: String) -> ApiResult<String> {
+    crate::gstr9::gstr9_csv(&*lock(&state)?, year, &table)
+}
+
+/// GSTR-1 Table 12 (HSN summary) for a period as CSV; `which` "b2b", "b2c" or "all".
+#[tauri::command(rename_all = "snake_case")]
+pub fn gstr1_hsn_csv(state: State<'_, AppState>, from: String, to: String, which: String) -> ApiResult<String> {
+    crate::gstr9::gstr1_hsn_csv(&*lock(&state)?, &from, &to, &which)
+}
+
+/// Compare the books' GSTR-9 with files downloaded from the GST portal (their names and text).
+#[tauri::command(rename_all = "snake_case")]
+pub fn gstr9_reconcile(
+    state: State<'_, AppState>,
+    year: i32,
+    files: Vec<crate::gstr9::PickedFile>,
+    tolerance: Option<String>,
+) -> ApiResult<crate::gstr9::Gstr9ReconDto> {
+    crate::gstr9::gstr9_reconcile(&*lock(&state)?, year, &files, tolerance.as_deref())
+}
+
+/// Read a return .json the user picked (GSTR-9, GSTR-1, GSTR-3B or GSTR-2B), on phones too.
+#[tauri::command(rename_all = "snake_case")]
+pub fn read_gst_return_file(app: AppHandle, path: String) -> ApiResult<String> {
+    #[cfg(mobile)]
+    if let Some(uri) = crate::phone_files::uri(&path) {
+        if !crate::phone_files::name_allowed(&uri, &["json"]) {
+            return Err("pick a .json file downloaded from the GST portal".into());
+        }
+        return crate::phone_files::read_text(&app, uri, 20 * 1024 * 1024);
+    }
+    let _ = &app;
+    crate::gstr9::read_json_file(&path)
+}
+
 // ------------------------------- Schedule III notes and mapping (India)
 
 /// Schedule III statements with their notes and ratios, as at `as_at`.

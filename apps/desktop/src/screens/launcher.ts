@@ -27,6 +27,7 @@ import { StockJournalScreen } from "./stockjournal";
 import { DashboardScreen, RatioAnalysisReport } from "./analysis";
 import { Gstr1Report, Gstr3bReport } from "./gst";
 import { Gstr2bReport } from "./gstr2b";
+import { Gstr9Report } from "./gstr9";
 import { GstFlagsScreen, Gstr1AmendmentsReport, ItcReport, RcmRegisterReport, Rule37Screen } from "./gst_rcm";
 import { Schedule3BalanceSheet, Schedule3Mapping, Schedule3Notes, Schedule3ProfitLoss } from "./schedule3";
 import { Vat201Report } from "./vat";
@@ -149,7 +150,7 @@ function localize(items: PickItem<Go>[]): PickItem<Go>[] {
  *  for a company of that country; every other row shows everywhere. */
 const REPORT_COUNTRY: Record<string, string> = {
   ...Object.fromEntries(
-    ["gstr1", "gstr3b", "gstr2b", "gstitc", "gstrcm", "gstr37", "gstflags", "gstr1a", "irpset", "tdspay", "tdsq", "tdsnr", "tcspay", "tcsq", "salary", "deductor", "s3bs", "s3pl", "s3notes", "s3map", "msme"].map((id) => [`r:${id}`, "IN"]),
+    ["gstr1", "gstr3b", "gstr2b", "gstr9", "gstr9c", "gstitc", "gstrcm", "gstr37", "gstflags", "gstr1a", "irpset", "tdspay", "tdsq", "tdsnr", "tcspay", "tcsq", "salary", "deductor", "s3bs", "s3pl", "s3notes", "s3map", "msme"].map((id) => [`r:${id}`, "IN"]),
   ),
   "r:vat201": "AE",
   "r:vatgb": "GB",
@@ -183,6 +184,8 @@ function reportItems(shell: Shell): PickItem<Go>[] {
     { id: "r:gstr1", label: "GSTR-1 (outward supplies)", section: "GST", data: () => new Gstr1Report(shell) },
     { id: "r:gstr3b", label: "GSTR-3B (summary return)", section: "GST", data: () => new Gstr3bReport(shell) },
     { id: "r:gstr2b", label: "GSTR-2B reconciliation", section: "GST", data: () => new Gstr2bReport(shell) },
+    { id: "r:gstr9", label: "GSTR-9 (annual return) and portal reconciliation", section: "GST", data: () => new Gstr9Report(shell) },
+    { id: "r:gstr9c", label: "GSTR-9C turnover reconciliation", section: "GST", data: () => new Gstr9Report(shell, undefined, "GSTR-9C") },
     { id: "r:gstitc", label: "Input tax credit (GSTR-3B Table 4)", section: "GST", data: () => new ItcReport(shell) },
     { id: "r:gstrcm", label: "Reverse charge register and self-invoices", section: "GST", data: () => new RcmRegisterReport(shell) },
     { id: "r:gstr37", label: "ITC to reverse for unpaid bills (Rule 37)", section: "GST", data: () => new Rule37Screen(shell) },

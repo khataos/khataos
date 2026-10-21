@@ -1,7 +1,7 @@
-# GST returns (India): GSTR-1 and GSTR-3B
+# GST returns (India): GSTR-1, GSTR-3B and GSTR-9
 
-KhataOS works out GSTR-1 and GSTR-3B figures from the books and can save a
-draft GSTR-1 JSON. These are a preparation aid. They are not a filing, and
+KhataOS works out GSTR-1, GSTR-3B and the annual GSTR-9 from the books and
+can save draft GSTR-1 and GSTR-9 JSON. These are a preparation aid. They are not a filing, and
 nothing here is legal advice: check the figures, and validate the JSON with
 the GST portal's Returns Offline Tool, before filing.
 
@@ -132,6 +132,75 @@ period's Sales and Credit Notes added, altered, cancelled or deleted after that
 time, from the audit trail, with number, date, party, value, taxable value and
 tax as filed and now. Report them in GSTR-1A before filing GSTR-3B, or as
 amendments in a later GSTR-1. No GSTR-1A JSON is produced.
+
+## GSTR-9 (annual return) and GSTR-9C groundwork
+
+Code: `crates/khata-in/src/gstr9.rs` (rules, JSON, CSV, portal files,
+comparison), `apps/desktop/src-tauri/src/gstr9.rs` (the year's vouchers and
+masters, hand entries), screen `apps/desktop/src/screens/gstr9.ts`. Sources,
+the year-by-year changes and what is uncertain: `docs/research/india-gstr9.md`.
+
+Open it from the Report Directory or Go To ("GSTR-9", India only), or press
+Enter on the GSTR-9 or GSTR-9C due date on the accountant's desk (it opens
+that year). F2 changes the year (the default is the last full year).
+
+**From the books** (same classification as GSTR-1 and GSTR-3B, rates settled
+by the same resolver):
+
+| Table | Rows |
+|---|---|
+| 4 | 4A B2C (net of B2C credit notes), 4B B2B, 4C exports with IGST, 4D SEZ with tax (party address marked SEZ), 4G inward supplies on reverse charge, 4I credit notes on B to E, 4J debit notes, totals 4H, 4M, 4N |
+| 5 | 5A exports under LUT, 5B SEZ without tax, 5E every 0% line (nil rated), 5H and 5I notes, totals 5G, 5L, 5M, 5N |
+| 6 | 6A (the ITC the books' GSTR-3B would show), 6B, 6C, 6D by inputs, capital goods (purchase lines on a ledger under Fixed Assets) and input services (SAC codes 99…), 6E IGST on purchases from suppliers abroad, 6F reverse charge from suppliers abroad, totals 6I, 6J, 6N, 6O, 6A2 |
+| 7 | 7A Rule 37 reversals falling due in the year (from the Rule 37 report), 7E blocked credit (`BLOCKED:` lines), totals 7I, 7J |
+| 8 | totals 8B, 8D, 8H, 8I, 8J, 8K (8A is the portal's) |
+| 9 | tax payable per tax, from 4N |
+| 17, 18 | HSN summaries of outward and inward supplies, by HSN, UQC and rate, net of credit notes and purchase returns; codes shorter than the HSN digits required (company setting, else 4 up to ₹5 crore turnover and 6 above) are flagged |
+| 9C Part A | 5A sales accounts in the profit and loss account, 5P to 5R and 7A to 7G worked out against GSTR-9 |
+
+**Entered by hand** (Ctrl+Enter on the row; all blank brings the books'
+figure back): 4E, 4F, 4G1, 4K, 4L, 5C, 5C1, 5D, 5F, 5J, 5K, 6A1, 6G, 6H, 6K
+to 6M, 7A1 (Rule 37A), 7A2 (Rule 38), 7B to 7D, 7F to 7H, 8A, 8C, 8E to 8G,
+8H1, the paid columns of Table 9 and its interest, late fee, penalty and other
+rows, Tables 10 to 16, Table 19, and the GSTR-9C adjustments 5B to 5O. Any
+row that is not a total can be entered, replacing the books' figure; totals
+follow. Entries are one shared record per company and year,
+`gst.gstr9.<YYYY-YY>`, so they sync (`docs/sync-settings.md`); only an
+accountant or the owner can save them.
+
+Rows follow the year: 4G1 and 5C1 from FY 2023-24 (Notif. 12/2024-CT); 6A1,
+6A2, 7A1, 7A2 and 8H1 from FY 2024-25, when 6J becomes I − A2 and 8B takes
+6B only (Notif. 13/2025-CT). Notes on the screen say what applies at the
+books' turnover (the ₹2 crore exemption, HSN digits, optional tables, 9C).
+
+**Exports.** Ctrl+Alt+J saves the JSON in the GSTN layout (`gstin`, `fp` =
+March of the year's end, `table4` … `table18`; keys in `JSON_ROWS`). No
+official schema was retrieved: **it needs validation in the GST offline tool**
+before upload. Rows whose keys no public source shows (6A1, 6A2, 7A1, 7A2,
+8H1) and Table 19 (the portal works out the late fee) are left out. Ctrl+Alt+X
+saves the table under the cursor as CSV; Tables 17 and 18 come in the order
+of the offline tool's HSN sheet (HSN, description, UQC, quantity, taxable
+value, concessional rate, rate, taxes). In GSTR-1, the HSN sections (Table 12)
+save the same way with Ctrl+Alt+X.
+
+**Comparison with the portal** (Alt+S; the files are picked by the user, on
+phones too; nothing is fetched): the GSTR-9 JSON with the system-computed
+values (the offline tool downloads it; the portal's own system-computed
+summary, GSTR-1 and GSTR-3B summaries are PDF, and Table 8A and Table 12
+details are Excel, which are not read), and GSTR-1, GSTR-3B and GSTR-2B
+JSON files for the year's periods, which are added up: GSTR-1 gives Tables 4
+and 5 by section and Table 12 for Table 17; GSTR-3B gives 4G, 6A and tax
+payable; GSTR-2B gives 8A (available, forward charge, net of credit notes) and
+8G (bills of entry). A GSTR-9 file's figures win over the others for the same
+row. Each row and column shows books, portal and the difference (books −
+portal; ₹1 tolerance, Ctrl+Alt+T changes it); HSN lines are compared by HSN
+and rate. Enter opens the vouchers behind a row. Amended GSTR-1 and GSTR-2B
+sections (B2BA and so on) are not added in; a warning says so.
+
+**Not yet:** GSTR-9C Tables 9 to 17 (tax paid, ITC, additional liability),
+Table 9's new "total paid" and "difference" columns for FY 2024-25, outward
+reverse charge and e-commerce rows from the books, deemed exports, imports
+from bills of entry, and Part V from next year's vouchers.
 
 ## Known gaps
 

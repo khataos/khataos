@@ -50,6 +50,7 @@ pub const SHARED_KEYS: &[&str] = &[
     // Tax settings and records of the company.
     "vat_gb.schemes",
     "gst.gstr1_filed.",
+    "gst.gstr9.",
     "tds.tan",
     "tds.deductor",
     "tds.challan.",

@@ -675,6 +675,10 @@ export class DeskScreen implements Screen {
       case "IN.GSTR3BQ":
       case "IN.PMT06":
         return go(import("./gst").then((m) => new m.Gstr3bReport(s, from, to)));
+      case "IN.GSTR9":
+        return go(import("./gstr9").then((m) => new m.Gstr9Report(s, fyYear)));
+      case "IN.GSTR9C":
+        return go(import("./gstr9").then((m) => new m.Gstr9Report(s, fyYear, "GSTR-9C")));
       case "IN.TDSPAY":
         return go(import("./tds").then((m) => new m.TdsPayableReport(s, from, to)));
       case "IN.TCSPAY":

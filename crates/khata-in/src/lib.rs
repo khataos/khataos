@@ -21,6 +21,7 @@ pub mod ewaybill;
 pub mod gst;
 pub mod gstin;
 pub mod gstr2b;
+pub mod gstr9;
 pub mod irp;
 pub mod pan;
 pub mod rcm;

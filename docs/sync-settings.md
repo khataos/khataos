@@ -122,6 +122,7 @@ Every key the app writes to a company file, and where it lives now.
 | `invoice.voucher.<uuid>` | `invoice_design.rs` | a voucher's ship-to and export details |
 | `vat_gb.schemes` | `vat_gb.rs` | UK Flat Rate, Cash and Annual Accounting schemes |
 | `gst.gstr1_filed.<YYYY-MM>` | `gst.rs` | GSTR-1 periods marked filed (GSTR-1A candidates) |
+| `gst.gstr9.<YYYY-YY>` | `gstr9.rs` | GSTR-9 figures entered by hand for a financial year (late fee, demands, amendments, 8A…) |
 | `tds.tan`, `tds.deductor` | `tds.rs` | the deductor's TAN and details for TDS statements |
 | `tds.challan.<voucher>` | `tds.rs` | a challan's BSR code, serial and deposit date |
 | `us.exempt.<ledger>` | `tax_us.rs` | a customer's resale and exemption certificates |

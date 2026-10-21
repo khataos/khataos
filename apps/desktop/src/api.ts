@@ -473,6 +473,27 @@ export const gstAdvApi = {
   readGstr2bFile: (path: string) => call<string>("read_gstr2b_file", { path }),
 };
 
+import type { Gstr9, Gstr9DocRef, Gstr9Recon } from "./types";
+
+/** GSTR-9, India's annual GST return (src-tauri gstr9.rs). `year`: the year the financial year starts (2025 for 2025-26). */
+export const gstr9Api = {
+  get: (year: number) => call<Gstr9>("gstr9", { year }),
+  /** Column key → amount as typed; null (or every value blank) clears the row's entries. */
+  setRow: (year: number, row: string, values: Record<string, string> | null) => call<Gstr9>("gstr9_set_row", { year, row, values }),
+  /** The vouchers behind a row ("4B") or an HSN line's key. */
+  docs: (year: number, key: string) => call<Gstr9DocRef[]>("gstr9_docs", { year, key }),
+  /** GSTN JSON layout; needs validation in the GST offline tool. Save it with api.writeGstJson. */
+  json: (year: number) => call<string>("gstr9_json", { year }),
+  /** One table as CSV ("4" … "19", "9C-5", "9C-7", "all"). Save it with api.writeCsv. */
+  csv: (year: number, table: string) => call<string>("gstr9_csv", { year, table }),
+  /** GSTR-1 Table 12 (HSN summary) for a period as CSV; `which` "b2b", "b2c" or "all". */
+  gstr1HsnCsv: (from: string, to: string, which: string) => call<string>("gstr1_hsn_csv", { from, to, which }),
+  reconcile: (year: number, files: { name: string; text: string }[], tolerance: string | null = null) =>
+    call<Gstr9Recon>("gstr9_reconcile", { year, files, tolerance }),
+  /** A return .json the user picked (GSTR-9, GSTR-1, GSTR-3B or GSTR-2B). */
+  readFile: (path: string) => call<string>("read_gst_return_file", { path }),
+};
+
 import type { Schedule3LineOption, Schedule3Mapping, Schedule3Statements } from "./types";
 
 /** Schedule III notes, mapping, division and rounding (khata_in::schedule3_notes). */

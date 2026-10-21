@@ -73,7 +73,7 @@ pub enum DocKind {
 
 impl DocKind {
     /// +1 for invoices and debit notes, −1 for credit notes.
-    fn sign(self) -> Decimal {
+    pub(crate) fn sign(self) -> Decimal {
         if self == DocKind::CreditNote { Decimal::NEGATIVE_ONE } else { Decimal::ONE }
     }
 }
@@ -106,6 +106,10 @@ pub struct DocLine {
     /// in 4(A) and is reversed in 4(B)(1) (Circular 170/02/2022-GST).
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub blocked: bool,
+    /// Inward documents only: the line is a capital good (a fixed asset),
+    /// for GSTR-9 Table 6. Ignored on outward documents.
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub capital_goods: bool,
 }
 
 /// A document the business issued: a tax invoice, credit note or debit note.
@@ -349,16 +353,16 @@ pub struct Gstr1 {
     pub warnings: Vec<String>,
 }
 
-/// A line with its rate settled.
-struct Resolved {
-    hsn: Option<String>,
-    uqc: Option<String>,
-    qty: Decimal,
-    rate: Decimal,
-    amounts: Amounts,
+/// A line with its rate settled (GSTR-9 settles rates the same way).
+pub(crate) struct Resolved {
+    pub(crate) hsn: Option<String>,
+    pub(crate) uqc: Option<String>,
+    pub(crate) qty: Decimal,
+    pub(crate) rate: Decimal,
+    pub(crate) amounts: Amounts,
 }
 
-fn label(kind: DocKind, number: &str) -> String {
+pub(crate) fn label(kind: DocKind, number: &str) -> String {
     let k = match kind {
         DocKind::Invoice => "Invoice",
         DocKind::CreditNote => "Credit note",
@@ -369,7 +373,7 @@ fn label(kind: DocKind, number: &str) -> String {
 
 /// Settle each line's rate: the one given, else tax ÷ taxable value
 /// snapped to a standard rate.
-fn resolve(doc: &str, lines: &[DocLine], warnings: &mut Vec<String>) -> Vec<Resolved> {
+pub(crate) fn resolve(doc: &str, lines: &[DocLine], warnings: &mut Vec<String>) -> Vec<Resolved> {
     let untaxed = lines.iter().all(|l| l.rate.is_none() && Amounts::of_line(l).tax().is_zero());
     if untaxed && !lines.is_empty() {
         warnings.push(format!(
@@ -852,7 +856,7 @@ pub fn gstr3b(outward: &[OutwardDoc], inward: &[InwardDoc], period: Period, supp
 
 // ------------------------------------------------------------- JSON export
 
-fn num(d: Decimal) -> Value {
+pub(crate) fn num(d: Decimal) -> Value {
     serde_json::Number::from_f64(d.round_dp(2).to_f64().unwrap_or_default()).map_or(Value::Null, Value::Number)
 }
 
@@ -1130,6 +1134,7 @@ mod tests {
             cess: dec!(0),
             reverse_charge: false,
             blocked: false,
+            capital_goods: false,
         }
     }
 

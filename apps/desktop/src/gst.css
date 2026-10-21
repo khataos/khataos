@@ -41,3 +41,15 @@
 .rtable td.num.gst-credit {
   color: var(--ok);
 }
+
+/* GSTR-9: rows entered by hand, and figures the portal files do not cover. */
+.rtable tr.gst-entered td.num {
+  font-style: italic;
+}
+.rtable div.muted,
+.rtable tr.muted td {
+  color: var(--muted);
+}
+.gst-note li {
+  margin: 2px 0;
+}

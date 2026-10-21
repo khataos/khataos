@@ -3,7 +3,7 @@
 // preparation aid: check them, and validate the JSON with the GST offline
 // tool, before filing.
 import "../gst.css";
-import { api } from "../api";
+import { api, gstr9Api } from "../api";
 import { h } from "../dom";
 import * as D from "../dates";
 import { inUse, ltr, t as tr } from "../i18n";
@@ -190,6 +190,9 @@ export class Gstr1Report extends Report {
   }
 }
 
+/** HSN summary as CSV, in the offline tool's Table 12 order. */
+const HSN_CSV = "Ctrl+Alt+X";
+
 /** One GSTR-1 section: documents (Enter opens the voucher) or summary rows. */
 class Gstr1SectionReport extends Report {
   constructor(
@@ -277,6 +280,39 @@ class Gstr1SectionReport extends Report {
     }
     if (!tbody.children.length) tbody.append(h("tr.empty", h("td", { colSpan: cols }, tr("Nothing in this section for the period."))));
     this.bodyEl.replaceChildren(h("table.rtable", thead, tbody));
+    if (this.hsn()) this.bodyEl.append(note(tr("{key} saves the HSN summary as CSV in the order of the offline tool's Table 12 sheet.", { key: ltr(HSN_CSV) })));
+  }
+
+  private hsn(): boolean {
+    return this.section === "hsn_b2b" || this.section === "hsn_b2c";
+  }
+
+  override bottom() {
+    const b = super.bottom();
+    if (this.hsn()) b.splice(b.length - 1, 0, { chord: HSN_CSV, label: "HSN CSV", enabled: true });
+    return b;
+  }
+
+  override key(e: KeyEv): boolean {
+    if (e.chord === HSN_CSV && this.hsn()) {
+      void this.exportHsn();
+      return true;
+    }
+    return super.key(e);
+  }
+
+  private async exportHsn(): Promise<void> {
+    try {
+      const which = this.section === "hsn_b2b" ? "b2b" : "b2c";
+      const csv = await gstr9Api.gstr1HsnCsv(this.from, this.to, which);
+      const path = await save({ defaultPath: `GSTR1-HSN-${which}-${this.from}-${this.to}.csv`, filters: [{ name: "CSV", extensions: ["csv"] }] });
+      if (!path) return;
+      const file = path.toLowerCase().endsWith(".csv") ? path : `${path}.csv`;
+      await api.writeCsv(file, csv);
+      this.shell.info(tr("Exported to {path}", { path: ltr(file) }));
+    } catch (e) {
+      this.shell.error(e);
+    }
   }
 }
 

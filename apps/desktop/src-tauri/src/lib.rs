@@ -36,6 +36,7 @@ pub mod vat_lines;
 pub mod pac_client;
 pub mod gst_rcm;
 pub mod gstr2b;
+pub mod gstr9;
 pub mod peppol;
 pub mod vat_fr;
 pub mod vat_nl;
@@ -310,6 +311,14 @@ pub fn run() {
             commands::gstr1_amendments,
             commands::gstr2b_reconcile,
             commands::read_gstr2b_file,
+            commands::gstr9,
+            commands::gstr9_set_row,
+            commands::gstr9_docs,
+            commands::gstr9_json,
+            commands::gstr9_csv,
+            commands::gstr1_hsn_csv,
+            commands::gstr9_reconcile,
+            commands::read_gst_return_file,
             commands::schedule3_statements,
             commands::print_schedule3_notes,
             commands::schedule3_mapping,
