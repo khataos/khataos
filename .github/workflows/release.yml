@@ -71,7 +71,7 @@ concurrency:
 
 env:
   INSTALL_GUIDE: https://github.com/khataos/khataos/blob/main/docs/guide/install.md
-  DOWNLOAD_PAGE: https://khataos.github.io/khataos/download/
+  DOWNLOAD_PAGE: https://khataos.org/download/
 
 jobs:
   prepare:

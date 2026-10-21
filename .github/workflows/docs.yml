@@ -5,9 +5,9 @@ name: docs
 #   website/          the home page, download page and themes gallery (plain
 #                     HTML, copied as it is) at the root of the site;
 #   docs/, mkdocs.yml the MkDocs documentation, built into docs/ of the site.
-# So https://khataos.github.io/khataos/ is the website,
-# https://khataos.github.io/khataos/download/ the download page (the QR code
-# and README.md link to it), and https://khataos.github.io/khataos/docs/ the docs.
+# So https://khataos.org/ is the website,
+# https://khataos.org/download/ the download page (the QR code
+# and README.md link to it), and https://khataos.org/docs/ the docs.
 #
 # Publishing to GitHub Pages is off until a maintainer turns it on (see
 # docs/README.md, "The docs site"):

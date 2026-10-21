@@ -2,9 +2,9 @@
 <!-- Sitemap index: the website pages, and the docs sitemap that MkDocs writes. -->
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>https://khataos.github.io/khataos/sitemap-pages.xml</loc>
+    <loc>https://khataos.org/sitemap-pages.xml</loc>
   </sitemap>
   <sitemap>
-    <loc>https://khataos.github.io/khataos/docs/sitemap.xml</loc>
+    <loc>https://khataos.org/docs/sitemap.xml</loc>
   </sitemap>
 </sitemapindex>

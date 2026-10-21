@@ -110,7 +110,7 @@ Releases are built by [`.github/workflows/release.yml`](.github/workflows/releas
 
 **The version.** The app version is `version` in `apps/desktop/src-tauri/tauri.conf.json`. The installers and the Android version code come from it. Two other files carry the same number and must match it: `version` under `[workspace.package]` in the root `Cargo.toml` (the app reports it in crash reports and tax filing headers) and `version` in `apps/desktop/package.json`. The release workflow stops if the three differ, or if the tag doesn't match them.
 
-Keep the version a plain `X.Y.Z`. A label such as `alpha.1` goes only in the tag: the Windows `.msi` refuses text labels in the version. So `v0.1.0-alpha.1` and `v0.1.0-alpha.2` are both builds of version `0.1.0`. Releases are never marked as pre-releases, even alphas: GitHub's "latest" release skips pre-releases, and the [download page](https://khataos.github.io/khataos/download/) links to the latest one. The tag in the title says it is an alpha.
+Keep the version a plain `X.Y.Z`. A label such as `alpha.1` goes only in the tag: the Windows `.msi` refuses text labels in the version. So `v0.1.0-alpha.1` and `v0.1.0-alpha.2` are both builds of version `0.1.0`. Releases are never marked as pre-releases, even alphas: GitHub's "latest" release skips pre-releases, and the [download page](https://khataos.org/download/) links to the latest one. The tag in the title says it is an alpha.
 
 To cut a release:
 

@@ -5,7 +5,7 @@ description: "Download KhataOS, free open source accounting software that works 
 
 <!--
   The download page now lives on the website (website/download/index.html),
-  served at https://khataos.github.io/khataos/download/. This short page stays
+  served at https://khataos.org/download/. This short page stays
   so that old links to /docs/download/ still lead somewhere useful.
 -->
 
@@ -15,7 +15,7 @@ The download page is on the KhataOS website. It puts the right file for your dev
 
 <div class="kd-hero" markdown>
 
-[Go to the download page](https://khataos.github.io/khataos/download/)
+[Go to the download page](https://khataos.org/download/)
 
 </div>
 

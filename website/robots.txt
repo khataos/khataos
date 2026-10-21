@@ -3,5 +3,5 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://khataos.github.io/khataos/sitemap.xml
-Sitemap: https://khataos.github.io/khataos/docs/sitemap.xml
+Sitemap: https://khataos.org/sitemap.xml
+Sitemap: https://khataos.org/docs/sitemap.xml

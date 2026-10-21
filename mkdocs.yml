@@ -8,7 +8,7 @@ site_description: "Free, open source accounting software that works offline: GST
 # The docs are served under /docs/ of the GitHub Pages site; the website in
 # website/ is the root (see .github/workflows/docs.yml). site_url gives the docs
 # canonical links and a sitemap.xml.
-site_url: https://khataos.github.io/khataos/docs/
+site_url: https://khataos.org/docs/
 repo_url: https://github.com/khataos/khataos
 repo_name: khataos/khataos
 edit_uri: edit/main/docs/
@@ -75,8 +75,8 @@ validation:
     unrecognized_links: info
 
 nav:
-  - Website: https://khataos.github.io/khataos/
-  - Download: https://khataos.github.io/khataos/download/
+  - Website: https://khataos.org/
+  - Download: https://khataos.org/download/
   - Home: README.md
   - User guide:
       - guide/README.md

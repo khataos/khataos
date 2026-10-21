@@ -11,15 +11,15 @@ If you're used to TallyPrime, you'll feel at home: many of its keyboard shortcut
 
 > **Status: alpha.** Don't use it for your only set of books yet. Try it on a test company and [tell us what breaks](#try-it-and-report-issues).
 
-**Website:** [khataos.github.io/khataos](https://khataos.github.io/khataos/), with the [download page](https://khataos.github.io/khataos/download/), the [themes](https://khataos.github.io/khataos/themes/) and the [documentation](https://khataos.github.io/khataos/docs/).
+**Website:** [khataos.org](https://khataos.org/), with the [download page](https://khataos.org/download/), the [themes](https://khataos.org/themes/) and the [documentation](https://khataos.org/docs/).
 
 **New here?** Read the [user guide](docs/guide/README.md): [install](docs/guide/install.md), [create your first company](docs/guide/first-company.md), and, if you use Tally today, [coming from Tally](docs/guide/coming-from-tally.md).
 
 ## Download
 
-**[Download KhataOS](https://khataos.github.io/khataos/download/)** for Android, Windows, Mac or Linux. The download page picks the right file for your device and shows how to install it.
+**[Download KhataOS](https://khataos.org/download/)** for Android, Windows, Mac or Linux. The download page picks the right file for your device and shows how to install it.
 
-The first release is an **alpha**, an early test version. The files aren't signed yet, so your phone or computer warns you before it installs KhataOS. The [download page](https://khataos.github.io/khataos/download/) and the [install guide](docs/guide/install.md) show what to tap or click.
+The first release is an **alpha**, an early test version. The files aren't signed yet, so your phone or computer warns you before it installs KhataOS. The [download page](https://khataos.org/download/) and the [install guide](docs/guide/install.md) show what to tap or click.
 
 Direct links. They always get the newest release:
 
@@ -179,7 +179,7 @@ Please don't report vulnerabilities in public issues. Use [GitHub's private vuln
 
 ## Docs
 
-All the documentation is listed in [`docs/README.md`](docs/README.md), and published at [khataos.github.io/khataos/docs](https://khataos.github.io/khataos/docs/).
+All the documentation is listed in [`docs/README.md`](docs/README.md), and published at [khataos.org/docs](https://khataos.org/docs/).
 
 - [User guide](docs/guide/README.md): short pages for every screen and task, with the exact keys. Start with [Coming from Tally](docs/guide/coming-from-tally.md) if you know TallyPrime.
 - [Key reference](docs/guide/keyboard.md): every key, generated from the key map.

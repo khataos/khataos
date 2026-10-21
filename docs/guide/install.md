@@ -6,7 +6,7 @@
 
 ## Download
 
-The easiest way is the **[download page](https://khataos.github.io/khataos/download/)**. Open it on the phone or computer where you want KhataOS. It picks the right file for that device and shows the install steps.
+The easiest way is the **[download page](https://khataos.org/download/)**. Open it on the phone or computer where you want KhataOS. It picks the right file for that device and shows the install steps.
 
 The first release is an alpha, an early test version.
 
@@ -80,7 +80,7 @@ KhataOS then appears in your applications menu.
 
 KhataOS isn't in the Play Store yet, so you install the APK file yourself (this is called sideloading).
 
-1. On the phone, open the [download page](https://khataos.github.io/khataos/download/) and tap **Download for Android**. This downloads `KhataOS-Android.apk`. If Chrome warns that this type of file can harm your device, tap **Download anyway**.
+1. On the phone, open the [download page](https://khataos.org/download/) and tap **Download for Android**. This downloads `KhataOS-Android.apk`. If Chrome warns that this type of file can harm your device, tap **Download anyway**.
 2. Open the downloaded file. Android asks you to allow installs from this source (your browser or Files app). Tap **Settings**, turn on **Allow from this source**, go back, and tap **Install**.
 3. If Google Play Protect says **Unsafe app blocked**, or warns about an unknown developer, tap **More details**, then **Install anyway**.
 
@@ -126,7 +126,7 @@ Compare the result with the line for that file in `SHA256SUMS.txt`. If they diff
 
 ### Update
 
-Download the newest release from the [download page](https://khataos.github.io/khataos/download/) and install it the same way, over the old one. Your company files are kept outside the app, so updating doesn't touch them. Still, [back them up](backup.md) first: KhataOS is in alpha.
+Download the newest release from the [download page](https://khataos.org/download/) and install it the same way, over the old one. Your company files are kept outside the app, so updating doesn't touch them. Still, [back them up](backup.md) first: KhataOS is in alpha.
 
 ## Build from source
 

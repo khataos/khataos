@@ -5,11 +5,11 @@
 ## On GitHub
 
 - [ ] **Upload the social preview.** Settings → General → Social preview: upload `branding/concepts/1-spine/social-preview.png` (1280 × 640). Links shared on social media and in chat then show the KhataOS card.
-- [ ] **Turn on the docs site.** Follow "The docs site" in [`docs/README.md`](README.md): Pages source set to GitHub Actions, and the `DOCS_PAGES` variable set to `true`. The website (`website/`) is then at https://khataos.github.io/khataos/, the download page at https://khataos.github.io/khataos/download/ and the docs at https://khataos.github.io/khataos/docs/.
-- [ ] **Set the repository homepage** (the cog next to About) to https://khataos.github.io/khataos/.
+- [ ] **Turn on the docs site.** Follow "The docs site" in [`docs/README.md`](README.md): Pages source set to GitHub Actions, and the `DOCS_PAGES` variable set to `true`. The website (`website/`) is then at https://khataos.org/, the download page at https://khataos.org/download/ and the docs at https://khataos.org/docs/.
+- [ ] **Set the repository homepage** (the cog next to About) to https://khataos.org/.
 - [ ] **Set the About description and topics.** For example: "Free, open source accounting software that works offline: GST, VAT, ZATCA e-invoicing, UK MTD. Imports from Tally XML, with familiar keyboard shortcuts." Topics: `accounting`, `accounting-software`, `gst`, `vat`, `zatca`, `e-invoicing`, `making-tax-digital`, `tauri`, `rust`, `offline-first`, `bookkeeping`. Don't use Tally's names as topics; see the trademark note at the end of this page.
 - [ ] **Publish a GitHub release** as soon as the first builds exist. Releases show on the repository page, and they rank in search.
-- [ ] **Submit the sitemap** (https://khataos.github.io/khataos/sitemap.xml) in Google Search Console and Bing Webmaster Tools once the site is live. It is a sitemap index that lists the website pages and the docs sitemap (https://khataos.github.io/khataos/docs/sitemap.xml). Search engines read `robots.txt` only at the root of a host, so on `khataos.github.io` the one in `website/` is ignored until the site has its own domain: submit the sitemap by hand.
+- [ ] **Submit the sitemap** (https://khataos.org/sitemap.xml) in Google Search Console and Bing Webmaster Tools once the site is live. It is a sitemap index that lists the website pages and the docs sitemap (https://khataos.org/docs/sitemap.xml). The site is served at the root of khataos.org, so `website/robots.txt` points search engines to the sitemap too.
 
 ## Lists and directories
 
