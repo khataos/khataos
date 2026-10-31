@@ -766,6 +766,11 @@ pub fn create_company(slot: &mut Slot, path: &Path, name: &str) -> ApiResult<Com
     if name.is_empty() {
         return Err("company name is required".into());
     }
+    // SQLite takes an empty path as a temporary database: the books would
+    // vanish when the app closes.
+    if path.as_os_str().is_empty() {
+        return Err("choose a file for the company".into());
+    }
     if path.exists() {
         return Err(format!("a file already exists at {}", path.display()));
     }
@@ -1659,6 +1664,11 @@ pub(crate) mod tests {
             create_company(&mut slot, &f.0, "Two")
                 .unwrap_err()
                 .contains("already exists")
+        );
+        assert!(
+            create_company(&mut slot, Path::new(""), "Nowhere")
+                .unwrap_err()
+                .contains("choose a file")
         );
         let missing = TempFile::new("missing");
         assert!(

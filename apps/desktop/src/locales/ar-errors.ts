@@ -163,6 +163,7 @@ export const PATTERNS: [string, string][] = [
   ['invalid amount "{text}"', "مبلغ غير صالح «{text}»."],
   ['unknown voucher type "{text}"', "نوع سند غير معروف «{text}»."],
   ['there is no country pack for "{code}"', "لا توجد حزمة دولة للرمز «{code}»."],
+  ["choose a file for the company", "اختر ملفًا للشركة."],
   ["a file already exists at {path}", "يوجد ملف مسبقًا في {path}."],
   ["no company file at {path}", "لا يوجد ملف شركة في {path}."],
   ["cannot read {path}: {e}", "تعذّرت قراءة {path}: {e}"],
