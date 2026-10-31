@@ -81,6 +81,12 @@ export function hijri(isoDate: string, l: Lang = language()): string | null {
   return `${get("day")} ${get("month")} ${year} ${l === "ar" ? "هـ" : "AH"}`;
 }
 
+/** A month as a report row: "Apr 2026" ("أبريل 2026"). */
+export function monthName(isoDate: string): string {
+  const [y, m] = parts(isoDate);
+  return `${(language() === "ar" ? MONTHS_AR : MONTHS)[m - 1]} ${y}`;
+}
+
 export function weekday(isoDate: string): string {
   const [y, m, d] = parts(isoDate);
   return (language() === "ar" ? DAYS_AR : DAYS)[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];

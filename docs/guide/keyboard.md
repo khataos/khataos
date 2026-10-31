@@ -190,7 +190,7 @@ Day Book, ledger statements, Trial Balance and the other reports.
 | `F5` | Another view of the report | Not yet |
 | `F6` | Another view of the report | Not yet |
 | `Ctrl+B` | Basis of values | Not yet |
-| `Ctrl+H` | Change view | Partly: Dashboard (chart or table) only |
+| `Ctrl+H` | Change view | Partly: Dashboard (chart or table) and ledgers (vouchers or month by month) |
 | `Ctrl+J` | Exception reports | Not yet |
 | `Ctrl+F` | Filter the rows | Partly: the Desk only |
 | `Ctrl+Alt+F` | Filter details | Not yet |

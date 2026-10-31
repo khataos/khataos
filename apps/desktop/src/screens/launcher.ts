@@ -13,6 +13,7 @@ import {
   BalanceSheetReport,
   ChartOfAccounts,
   DayBook,
+  LedgerMonthlyReport,
   LedgerStatementReport,
   MsmeOverdueReport,
   OutstandingReport,
@@ -254,6 +255,19 @@ async function ledgerItems(shell: Shell, q: string, section?: string): Promise<P
   }));
 }
 
+/** The cash and bank books: each cash or bank ledger month by month. */
+async function bookItems(shell: Shell, q: string): Promise<PickItem<Go>[]> {
+  const [from, to] = fy(shell);
+  const ledgers = await api.listLedgers(q, "cash_bank");
+  return ledgers.map((l) => ({
+    id: `b:${l.id}`,
+    label: l.name,
+    sub: M.drCr(M.of(l.balance), true) || l.group_name,
+    section: t("Cash and bank books"),
+    data: () => new LedgerMonthlyReport(shell, l.id, from, to),
+  }));
+}
+
 /** Alt+F: find a ledger by any part of its name and open its statement. */
 export class FindScreen extends PickerScreen {
   title = "Find";
@@ -311,7 +325,11 @@ export class ReportDirectory extends PickerScreen {
     super(shell, h("input.field.launcher-input", { placeholder: t("Type to filter"), spellcheck: false }), "directory");
     this.overlay = false;
     this.el.prepend(h("div.launcher-title", t("Report Directory")), this.input);
-    this.build(t("Reports"), async (q) => [...matches(reportItems(shell), q), ...(await ledgerItems(shell, q, "Ledger statements"))]);
+    this.build(t("Reports"), async (q) => {
+      // "cash book" or "bank book" lists every cash or bank ledger; other text filters them by name.
+      const books = /^\s*(cash|bank)\s*books?\s*$/i.test(q) ? await bookItems(shell, "") : await bookItems(shell, q);
+      return [...matches(reportItems(shell), q), ...books, ...(await ledgerItems(shell, q, "Ledger statements"))];
+    });
   }
 }
 

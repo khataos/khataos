@@ -250,7 +250,10 @@ pub fn describe(context: Context, action: Action) -> (&'static str, Status) {
         ChangeContext => ("Change the report's ledger, group or voucher type", NotYet),
         AltView1 | AltView2 => ("Another view of the report", NotYet),
         BasisOfValues => ("Basis of values", NotYet),
-        ChangeView => ("Change view", Partly("Dashboard (chart or table) only")),
+        ChangeView => (
+            "Change view",
+            Partly("Dashboard (chart or table) and ledgers (vouchers or month by month)"),
+        ),
         ExceptionReports => ("Exception reports", NotYet),
         Filter => ("Filter the rows", Partly("the Desk only")),
         FilterDetails => ("Filter details", NotYet),

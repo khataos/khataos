@@ -121,7 +121,11 @@ With nothing set, the period runs from the start of the financial year to the cu
 
 **Group Summary.** The ledgers under a group (subgroups are flattened into one list). You reach it by opening a group from another report.
 
-**Ledger statement.** One ledger's vouchers with the opening balance, running balance and closing balance. A ledger in a foreign currency also shows the foreign amount. A ✎ mark shows vouchers that have a note.
+**Ledger statement.** One ledger's vouchers with the opening balance, running balance and closing balance. A ledger in a foreign currency also shows the foreign amount. A ✎ mark shows vouchers that have a note. `Ctrl+H` switches to the monthly summary.
+
+**Ledger monthly summary.** One ledger month by month: each month's debits, credits and closing balance, with the opening balance above and the totals below. Every month of the period has a row, even with no vouchers. `Enter` on a month opens its vouchers, and `Ctrl+H` goes back to the vouchers for the whole period.
+
+**Cash and bank books.** In the Report Directory (`D` on the home menu), the "Cash and bank books" section lists every cash and bank ledger. Type `cash book` or `bank book` to see only them. Each opens month by month.
 
 **Outstanding Receivables and Payables.** Every open bill, with its due date, pending amount and days overdue. Overdue days count from the due date, or from the bill date when there is no due date. These need bill-wise details on your vouchers (see [Vouchers](vouchers.md)).
 
@@ -168,5 +172,5 @@ These report keys that Tally users know are reserved but not built. See the [key
 - Detailed view (`Alt+F5`) anywhere except Stock Summary, and expand one line (`Shift+Enter`).
 - Change the report's subject (`F4`), basis of values (`Ctrl+B`), exception reports (`Ctrl+J`).
 - Hide and show rows (`Ctrl+R`, `Ctrl+U`).
-- Sales, purchase and journal registers, ledger monthly summaries, cash and bank books, cash flow and funds flow.
+- Sales, purchase and journal registers, a summary of all cash and bank ledgers on one screen, cash flow and funds flow.
 - Email and WhatsApp (`Ctrl+M`, `Ctrl+Alt+W`).

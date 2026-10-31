@@ -79,7 +79,7 @@ Pressing a reserved key for one of these says "isn't available in this version y
 
 - Filters (`Ctrl+F`), extra columns and comparisons (`Alt+C`, `Alt+N`), saved views (`Ctrl+L`), `F4` change report, `Ctrl+B`, `Ctrl+J`, hide lines.
 - Trial Balance, Balance Sheet and P&L by group and in detail (`Alt+F5` works on Stock Summary only).
-- Sales, purchase and journal registers, ledger monthly summary, cash and bank books, cash flow and funds flow.
+- Sales, purchase and journal registers, a summary of all cash and bank ledgers on one screen, cash flow and funds flow.
 - Exception reports, the edit log viewer (`Alt+Q`), statistics.
 - Order, stock ageing, movement and reorder reports.
 

@@ -837,6 +837,119 @@ export class LedgerStatementReport extends Report {
     this.cursor = 0;
     await this.reload();
   }
+
+  override handles(a: string): boolean {
+    return a === "ChangeView" || super.handles(a);
+  }
+
+  override bottom() {
+    const b = super.bottom();
+    const view = this.shell.btn("ChangeView", this.contexts(), "Monthly");
+    if (view) b.splice(b.length - 1, 0, view);
+    return b;
+  }
+
+  override action(a: string): boolean {
+    if (a !== "ChangeView") return super.action(a);
+    // Ctrl+H: the same ledger and period, month by month, in this screen's place.
+    this.shell.pop();
+    void this.shell.push(new LedgerMonthlyReport(this.shell, this.ledgerId, this.from, this.to));
+    return true;
+  }
+}
+
+// ------------------------------------------------- ledger monthly summary
+
+/**
+ * A ledger month by month (the cash and bank books are this for a cash or
+ * bank ledger): each month's debits, credits and closing balance. Enter
+ * opens the month's vouchers; Ctrl+H shows the whole period's vouchers.
+ */
+export class LedgerMonthlyReport extends Report {
+  title = "Ledger Monthly Summary";
+  protected override period = "range" as const;
+  protected override noteable = true;
+  private ledgerName = "";
+  constructor(shell: Shell, private ledgerId: string, private from: string, private to: string) {
+    super(shell);
+  }
+
+  protected override defaultNote(): NoteLink {
+    return { kind: "ledger", id: this.ledgerId, label: this.ledgerName };
+  }
+
+  async load(): Promise<void> {
+    const st = await api.ledgerStatement(this.ledgerId, this.from, this.to);
+    this.ledgerName = st.ledger_name;
+    this.title = tr("Ledger: {name}", { name: st.ledger_name });
+    this.heading(st.ledger_name, range(this.from, this.to));
+    this.resetPicks();
+    const tbody = h("tbody");
+    let balance = M.of(st.opening);
+    tbody.append(h("tr.opening", h("td.strong", tr("Opening Balance")), h("td"), h("td"), h("td.num", M.drCr(balance))));
+    for (const m of months(this.from, this.to)) {
+      const rows = st.rows.filter((r) => r.date >= m.from && r.date <= m.to);
+      const dr = M.sum(rows.map((r) => M.of(r.debit)));
+      const cr = M.sum(rows.map((r) => M.of(r.credit)));
+      balance += dr - cr;
+      tbody.append(
+        this.pick(
+          h("tr", h("td", m.label), amountCell(M.toDecimal(dr)), amountCell(M.toDecimal(cr)), h("td.num", M.drCr(balance))),
+          () => void this.shell.push(new LedgerStatementReport(this.shell, this.ledgerId, m.from, m.to)),
+        ),
+      );
+    }
+    const dr = M.sum(st.rows.map((r) => M.of(r.debit)));
+    const cr = M.sum(st.rows.map((r) => M.of(r.credit)));
+    this.bodyEl.replaceChildren(
+      h(
+        "table.rtable",
+        h("thead", h("tr", h("th", tr("Month")), h("th.num", tr("Debit")), h("th.num", tr("Credit")), h("th.num", tr("Closing Balance")))),
+        tbody,
+        h(
+          "tfoot",
+          h("tr", h("td", tr("Grand Total")), h("td.num", M.format(dr)), h("td.num", M.format(cr)), h("td")),
+          h("tr", h("td", tr("Closing Balance")), h("td"), h("td"), h("td.num", M.drCr(M.of(st.closing)))),
+        ),
+      ),
+    );
+  }
+
+  protected override async askPeriod(): Promise<void> {
+    const r = await this.rangeDialog(this.from, this.to);
+    if (!r) return;
+    [this.from, this.to] = r;
+    this.cursor = 0;
+    await this.reload();
+  }
+
+  override handles(a: string): boolean {
+    return a === "ChangeView" || super.handles(a);
+  }
+
+  override bottom() {
+    const b = super.bottom();
+    const view = this.shell.btn("ChangeView", this.contexts(), "Vouchers");
+    if (view) b.splice(b.length - 1, 0, view);
+    return b;
+  }
+
+  override action(a: string): boolean {
+    if (a !== "ChangeView") return super.action(a);
+    this.shell.pop();
+    void this.shell.push(new LedgerStatementReport(this.shell, this.ledgerId, this.from, this.to));
+    return true;
+  }
+}
+
+/** The months a period touches, each cut to the period: "Apr 2026", 1-Apr to 30-Apr. */
+function months(from: string, to: string): { label: string; from: string; to: string }[] {
+  const out = [];
+  for (let first = `${from.slice(0, 7)}-01`; first <= to; first = D.addMonths(first, 1)) {
+    const last = D.addDays(D.addMonths(first, 1), -1);
+    out.push({ label: D.monthName(first), from: first < from ? from : first, to: last > to ? to : last });
+  }
+  return out;
 }
 
 // ------------------------------------------------------ chart of accounts

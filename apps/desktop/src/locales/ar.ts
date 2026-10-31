@@ -3545,4 +3545,9 @@ export const AR: Record<string, string> = {
   "Move to a voucher row first.": "انتقل أولاً إلى سطر سند.",
   "Add Vch": "إضافة سند",
   "Duplicate Vch": "نسخ السند", // ar: check
+
+  // ------------------------------------------- ledger monthly summary (reports.ts)
+  "Ledger Monthly Summary": "ملخص الحساب الشهري", // ar: check
+  "Monthly": "شهري",
+  "Cash and bank books": "دفاتر النقدية والبنوك", // ar: check
 };
