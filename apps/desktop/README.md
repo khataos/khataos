@@ -16,7 +16,7 @@ Behaviour follows [`docs/ux/interaction-spec.md`](../../docs/ux/interaction-spec
 ```sh
 cd apps/desktop
 pnpm install
-pnpm app:dev          # tauri dev with Vite hot reload on http://localhost:1420
+pnpm app:dev          # tauri dev with Vite hot reload on http://localhost:1430
 ```
 
 `app:dev` merges `src-tauri/tauri.dev.conf.json` (devUrl and the Vite dev
