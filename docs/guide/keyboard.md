@@ -203,12 +203,22 @@ Day Book, ledger statements, Trial Balance and the other reports.
 | `Shift+Space` | Select (tick) the row | Partly: the bank statement review only |
 | `Ctrl+Space` | Select (tick) all rows | Partly: the bank statement review only |
 | `Ctrl+Alt+I` | Invert the selection | Not yet |
-| `Alt+I` | Insert a voucher before the row | Not yet |
-| `Alt+2` | Duplicate the voucher | Not yet |
+| `Alt+I` | Insert a voucher of the row's type, on the row's date | Partly: Day Book only |
+| `Alt+2` | Duplicate the row's voucher as a new one, on the same date | Partly: Day Book only |
 | `Alt+X` | Cancel the voucher on the row (asks first) | Partly: Day Book only |
 | `Ctrl+R` | Hide the row | Not yet |
 | `Ctrl+U` | Show hidden rows again | Not yet |
 | `PageUp` | Move up a page of rows | Yes |
 | `PageDown` | Move down a page of rows | Yes |
+| `Plus` | Next period of the same length: the next day, month, quarter or year | Yes |
+| `Minus` | Previous period of the same length | Yes |
+
+### Day Book
+
+In Day Book, besides the report keys above.
+
+| Key | What it does | Works today? |
+|---|---|---|
+| `Alt+A` | Add a voucher of the row's type, on the row's date | Yes |
 
 <!-- keymap-doc:end -->

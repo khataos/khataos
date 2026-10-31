@@ -11,7 +11,7 @@ import * as M from "../money";
 import { save } from "@tauri-apps/plugin-dialog";
 import type { KeyEv, Screen, Shell } from "../shell";
 import { KIND_LABEL, type Context, type DayBookRow, type ExportTable, type Group, type GroupTotal, type Ledger, type ReportSpec, type VoucherKind } from "../types";
-import { savedVoucherScreen } from "./stockjournal";
+import { newVoucherScreen, savedVoucherScreen } from "./stockjournal";
 import type { NoteLink } from "../desk-api";
 import { allNotes, editNote, notesBlock } from "./desk";
 
@@ -61,7 +61,7 @@ export abstract class Report implements Screen {
   }
 
   handles(a: string): boolean {
-    if (a === "ChangeDate" || a === "ChangePeriod") return this.period !== null;
+    if (a === "ChangeDate" || a === "ChangePeriod" || a === "NextPeriod" || a === "PreviousPeriod") return this.period !== null;
     if (a === "AddNote") return this.noteable;
     return ["DrillDown", "Back", "PrintCurrent", "ExportCurrent"].includes(a);
   }
@@ -263,6 +263,12 @@ export abstract class Report implements Screen {
       void this.askPeriod();
       return true;
     }
+    if ((a === "NextPeriod" || a === "PreviousPeriod") && this.period) {
+      // A field on the report (a typed amount) keeps its + and -.
+      if (document.activeElement instanceof HTMLInputElement) return false;
+      void this.stepPeriod(a === "NextPeriod" ? 1 : -1);
+      return true;
+    }
     if (a === "PageDown" || a === "NextRecord") {
       this.move(10);
       return true;
@@ -276,6 +282,49 @@ export abstract class Report implements Screen {
 
   protected askPeriod(): Promise<void> {
     return Promise.resolve();
+  }
+
+  /**
+   * + and -: the next or previous period of the same length (dates.ts
+   * stepPeriod). Period reports keep their dates as `from` and `to`, as
+   * `asAt`, or as a `year` (with a `quarter`, 1 to 4, in the quarterly
+   * returns); a report with other dates overrides this.
+   */
+  protected async stepPeriod(dir: 1 | -1): Promise<void> {
+    const self = this as unknown as { from?: unknown; to?: unknown; asAt?: unknown; year?: unknown; quarter?: unknown };
+    const { from, to, asAt, year, quarter } = self;
+    if (this.period === "range" && typeof from === "string" && typeof to === "string") {
+      ({ from: self.from, to: self.to } = D.stepPeriod({ from, to }, dir));
+      await this.loadStepped(() => Object.assign(self, { from, to }));
+    } else if (this.period === "asat" && typeof asAt === "string") {
+      self.asAt = D.stepDate(asAt, dir);
+      await this.loadStepped(() => Object.assign(self, { asAt }));
+    } else if (typeof year === "number" && typeof quarter === "number") {
+      const n = year * 4 + quarter - 1 + dir;
+      [self.year, self.quarter] = [Math.floor(n / 4), (n % 4) + 1];
+      await this.loadStepped(() => Object.assign(self, { year, quarter }));
+    } else if (typeof year === "number" && quarter === undefined) {
+      self.year = year + dir;
+      await this.loadStepped(() => Object.assign(self, { year }));
+    } else {
+      this.shell.warn(tr("Press F2 to change this report's period."));
+    }
+  }
+
+  /** Show the stepped period; if it can't load, put the old one back. */
+  protected async loadStepped(undo: () => void): Promise<void> {
+    const cursor = this.cursor;
+    this.cursor = 0;
+    try {
+      await this.load();
+    } catch (e) {
+      undo();
+      this.cursor = cursor;
+      this.shell.error(e);
+      return;
+    }
+    this.paint();
+    this.shell.refresh();
   }
 
   protected async rangeDialog(from: string, to: string): Promise<[string, string] | null> {
@@ -352,11 +401,42 @@ export class DayBook extends Report {
     return { report: "day_book", from: this.from, to: this.to };
   }
 
+  override contexts(): Context[] {
+    return ["Register", "Report"];
+  }
+
   override handles(a: string): boolean {
-    return a === "CancelVoucher" || a === "ExportMenu" || super.handles(a);
+    return ["CancelVoucher", "ExportMenu", "AddVoucherAfter", "InsertVoucherBefore", "DuplicateVoucher"].includes(a) || super.handles(a);
+  }
+
+  override bottom() {
+    const ctx = this.contexts();
+    const b = super.bottom();
+    const add = [this.shell.btn("AddVoucherAfter", ctx, "Add Vch"), this.shell.btn("DuplicateVoucher", ctx, "Duplicate Vch", this.rows.length > 0)];
+    b.splice(b.length - 1, 0, ...add.filter((x): x is NonNullable<typeof x> => x !== null));
+    return b;
+  }
+
+  /**
+   * Alt+A and Alt+I: a new voucher of the row's type on the row's date (on an
+   * empty Day Book, a Payment on its last date). Day Book lists a date's
+   * vouchers by number, so before and after the row come to the same thing.
+   * Alt+2: a copy of the row's voucher, on its date, with the next number.
+   */
+  private addVoucher(copy: boolean): void {
+    const row = this.rows[this.cursor];
+    if (copy && !row) {
+      this.shell.warn(tr("Move to a voucher row first."));
+      return;
+    }
+    void this.shell.push(newVoucherScreen(this.shell, row?.kind ?? "Payment", row?.date ?? this.to, copy && row ? row.voucher : undefined));
   }
 
   override action(a: string): boolean {
+    if (a === "AddVoucherAfter" || a === "InsertVoucherBefore" || a === "DuplicateVoucher") {
+      this.addVoucher(a === "DuplicateVoucher");
+      return true;
+    }
     if (a === "ExportMenu") {
       // Alt+E: the period's invoices and notes (or the voucher under the cursor) as one PDF.
       const r = this.rows[this.cursor];

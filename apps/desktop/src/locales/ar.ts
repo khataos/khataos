@@ -3538,4 +3538,11 @@ export const AR: Record<string, string> = {
   "2026-27 · 26-27 · FY27 · AY 2027-28 · last year": "⁦2026-27⁩ · ⁦26-27⁩ · ⁦FY27⁩ · ⁦AY 2027-28⁩ · ⁦last year⁩ (السنة الماضية)", // ar: check (shortcuts are typed in Latin letters)
   "2026 · this year · last year": "⁦2026⁩ · ⁦this year⁩ (هذه السنة) · ⁦last year⁩ (السنة الماضية)", // ar: check (shortcuts are typed in Latin letters)
   "1 (Apr-Jun) · 2 (Jul-Sep) · 3 (Oct-Dec) · 4 (Jan-Mar)": "1 (أبريل-يونيو) · 2 (يوليو-سبتمبر) · 3 (أكتوبر-ديسمبر) · 4 (يناير-مارس)",
+  "Press F2 to change this report's period.": "اضغط F2 لتغيير فترة هذا التقرير.",
+  "Last entry": "آخر قيد",
+
+  // ------------------------------------------ Day Book: add and copy vouchers
+  "Move to a voucher row first.": "انتقل أولاً إلى سطر سند.",
+  "Add Vch": "إضافة سند",
+  "Duplicate Vch": "نسخ السند", // ar: check
 };

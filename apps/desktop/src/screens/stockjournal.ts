@@ -90,6 +90,12 @@ export function savedVoucherScreen(shell: Shell, kind: VoucherKind, date: string
   return kind === KIND ? new StockJournalScreen(shell, id) : new VoucherScreen(shell, kind, date, id);
 }
 
+/** A new voucher of `kind` on `date` (Alt+A, Alt+I in Day Book), or with `copy`, a copy of that saved voucher (Alt+2). */
+export function newVoucherScreen(shell: Shell, kind: VoucherKind, date: string, copy?: string): Screen {
+  if (kind === KIND) return copy ? StockJournalScreen.copyOf(shell, date, copy) : new StockJournalScreen(shell, undefined, date);
+  return copy ? VoucherScreen.copyOf(shell, kind, date, copy) : new VoucherScreen(shell, kind, date);
+}
+
 export class StockJournalScreen implements Screen {
   el: HTMLElement;
   private number = "";
@@ -126,6 +132,8 @@ export class StockJournalScreen implements Screen {
   private savedDate: string | null = null;
   /** Altering: the voucher as loaded, so Esc without changes just leaves. */
   private loaded: string | null = null;
+  /** Alt+2 in Day Book: the saved voucher this new one starts as a copy of. */
+  private copyId: string | null = null;
 
   constructor(
     private shell: Shell,
@@ -147,6 +155,13 @@ export class StockJournalScreen implements Screen {
     );
   }
 
+  /** Alt+2 in Day Book: a new Stock Journal with the lines of a saved one, on `date`. */
+  static copyOf(shell: Shell, date: string, id: string): StockJournalScreen {
+    const s = new StockJournalScreen(shell, undefined, date);
+    s.copyId = id;
+    return s;
+  }
+
   get title(): string {
     const kind = t(KIND_LABEL[KIND]);
     return t(this.cancelled ? "{kind} Voucher (Cancelled)" : this.alterId ? "{kind} Voucher (Alteration)" : "{kind} Voucher", { kind });
@@ -160,6 +175,16 @@ export class StockJournalScreen implements Screen {
     if (this.alterId) {
       await this.loadSaved(this.alterId);
       this.loaded = this.state();
+    } else if (this.copyId) {
+      // The copy moves stock afresh: nothing of the saved voucher is its own.
+      const date = this.date;
+      await this.loadSaved(this.copyId);
+      this.date = date;
+      this.cancelled = false;
+      this.savedMoves.clear();
+      this.savedDate = null;
+      this.number = await api.nextVoucherNumber(KIND, this.date);
+      await this.loadLocations();
     } else {
       const [number, godowns] = await Promise.all([api.nextVoucherNumber(KIND, this.date), this.loadGodowns(), this.loadLocations()]);
       this.number = number;
@@ -981,9 +1006,11 @@ export class StockJournalScreen implements Screen {
   }
 
   private async changeDate(): Promise<void> {
+    // Entries go in day by day, so a new voucher's F2 offers the next day; Enter takes it.
+    const offer = this.alterId ? this.date : D.addDays(this.date, 1);
     const v = await this.shell.dialog(
       "Voucher date",
-      [{ label: "Date", value: D.editable(this.date) }],
+      [{ label: "Date", value: D.editable(offer) }],
       ([text]) =>
         D.parseUser(text, this.date) ? null : t('"{text}" is not a date. Try 19-10-2026.', { text }),
       dateFields(["date"], () => this.date),

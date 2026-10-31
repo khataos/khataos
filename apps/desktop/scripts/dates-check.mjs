@@ -198,5 +198,26 @@ check("bound: month end", D.parseBound("Jun", ref, true), "2026-06-30");
 check("bound: FY end", D.parseBound("2025-26", ref, true), "2026-03-31");
 check("bound: nonsense", D.parseBound("zz", ref), null);
 
+// + and - in reports: the next or previous period of the same length.
+const steps = [
+  ["2026-04-01", "2026-04-30", 1, "2026-05-01..2026-05-31"],
+  ["2026-01-01", "2026-01-31", 1, "2026-02-01..2026-02-28"],
+  ["2026-03-01", "2026-03-31", -1, "2026-02-01..2026-02-28"],
+  ["2026-07-01", "2026-09-30", 1, "2026-10-01..2026-12-31"],
+  ["2027-01-01", "2027-03-31", 1, "2027-04-01..2027-06-30"],
+  ["2026-04-01", "2027-03-31", 1, "2027-04-01..2028-03-31"],
+  ["2026-04-01", "2027-03-31", -1, "2025-04-01..2026-03-31"],
+  ["2026-10-19", "2026-10-19", 1, "2026-10-20..2026-10-20"],
+  ["2026-10-31", "2026-10-31", 1, "2026-11-01..2026-11-01"],
+  ["2026-10-01", "2026-10-19", 1, "2026-10-20..2026-11-07"],
+  ["2026-10-13", "2026-10-19", -1, "2026-10-06..2026-10-12"],
+];
+for (const [from, to, dir, want] of steps) check(`step ${from}..${to} ${dir > 0 ? "+" : "-"}`, period(D.stepPeriod({ from, to }, dir)), want);
+check("step as at month end +", D.stepDate("2026-03-31", 1), "2026-04-30");
+check("step as at month end -", D.stepDate("2026-03-31", -1), "2026-02-28");
+check("step as at Feb end", D.stepDate("2028-02-29", 1), "2028-03-31");
+check("step as at a day", D.stepDate("2026-10-19", 1), "2026-10-20");
+check("step as at a day back", D.stepDate("2026-11-01", -1), "2026-10-31");
+
 console.log(`${passed} passed, ${failed} failed`);
 if (failed) process.exit(1);

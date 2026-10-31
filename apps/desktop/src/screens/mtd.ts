@@ -389,6 +389,11 @@ export class MtdReturnReport extends UkVatReturnReport {
     this.bodyEl.prepend(h("p.gst-note", { role: "status" }, line));
   }
 
+  /** + and -: the period stays HMRC's obligation. */
+  protected override stepPeriod(): Promise<void> {
+    return this.askPeriod();
+  }
+
   protected override async askPeriod(): Promise<void> {
     this.shell.warn(t("The period is HMRC's obligation ({span}); it can't be changed here.", { span: span(this.ob.start, this.ob.end) }));
   }

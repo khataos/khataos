@@ -274,9 +274,20 @@ pub fn describe(context: Context, action: Action) -> (&'static str, Status) {
             Partly("the bank statement review only"),
         ),
         InvertSelection => ("Invert the selection", NotYet),
-        AddVoucherAfter => ("Add a voucher after the row", NotYet),
-        InsertVoucherBefore => ("Insert a voucher before the row", NotYet),
-        DuplicateVoucher => ("Duplicate the voucher", NotYet),
+        NextPeriod => (
+            "Next period of the same length: the next day, month, quarter or year",
+            Yes,
+        ),
+        PreviousPeriod => ("Previous period of the same length", Yes),
+        AddVoucherAfter => ("Add a voucher of the row's type, on the row's date", Yes),
+        InsertVoucherBefore => (
+            "Insert a voucher of the row's type, on the row's date",
+            Partly("Day Book only"),
+        ),
+        DuplicateVoucher => (
+            "Duplicate the row's voucher as a new one, on the same date",
+            Partly("Day Book only"),
+        ),
         HideLine => ("Hide the row", NotYet),
         RestoreLine => ("Show hidden rows again", NotYet),
         AddNote => match context {
@@ -330,6 +341,11 @@ const SECTIONS: &[(Context, &str, &str)] = &[
         Context::Report,
         "Reports",
         "Day Book, ledger statements, Trial Balance and the other reports.",
+    ),
+    (
+        Context::Register,
+        "Day Book",
+        "In Day Book, besides the report keys above.",
     ),
 ];
 

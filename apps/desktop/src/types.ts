@@ -19,6 +19,7 @@ export type Context =
   | "Voucher"
   | "Master"
   | "Report"
+  | "Register"
   | "ListField"
   | "AmountField"
   | "Dialog";
@@ -40,6 +41,8 @@ export interface CompanyInfo {
   country: CountryInfo | null;
   ledger_count: number;
   voucher_count: number;
+  /** The date of the latest voucher; null with none. */
+  last_entry: string | null;
   opening_difference: string;
   sync_status: string | null;
   /** Shared with this computer as Viewer: no changes, not even the country. */

@@ -37,6 +37,8 @@ function keyName(e: KeyboardEvent): string | null {
 export function chordOf(e: KeyboardEvent): string | null {
   if (["Control", "Alt", "Shift", "Meta", "AltGraph"].includes(e.key)) return null;
   if (e.metaKey) return null; // leave Cmd shortcuts (copy, paste, quit) to the OS
+  // + and - by the typed character, keypad or main keyboard; + needs Shift on many layouts.
+  if ((e.key === "+" || e.key === "-") && !e.ctrlKey && !e.altKey) return e.key === "+" ? "Plus" : "Minus";
   const key = keyName(e);
   if (!key) return null;
   return (e.ctrlKey ? "Ctrl+" : "") + (e.altKey ? "Alt+" : "") + (e.shiftKey ? "Shift+" : "") + key;

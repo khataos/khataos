@@ -375,6 +375,8 @@ export class VoucherScreen implements Screen {
   private fxRateFor = "";
   /** A saved voucher's notes from the desk (Alt+W adds one). */
   private notesEl = h("div.vnotes");
+  /** Alt+2 in Day Book: the saved voucher this new one starts as a copy of. */
+  private copyId: string | null = null;
 
   constructor(
     private shell: Shell,
@@ -399,6 +401,13 @@ export class VoucherScreen implements Screen {
     this.reset();
   }
 
+  /** Alt+2 in Day Book: a new voucher with the lines of a saved one, on `date`. */
+  static copyOf(shell: Shell, kind: VoucherKind, date: string, id: string): VoucherScreen {
+    const s = new VoucherScreen(shell, kind, date);
+    s.copyId = id;
+    return s;
+  }
+
   get title(): string {
     const kind = kindName(this.kind);
     return t(this.cancelled ? "{kind} Voucher (Cancelled)" : this.alterId ? "{kind} Voucher (Alteration)" : "{kind} Voucher", { kind });
@@ -412,24 +421,12 @@ export class VoucherScreen implements Screen {
     this.fxBase = (await fxApi.currencies().catch(() => null))?.base?.code ?? "";
     if (this.alterId) {
       await this.loadSaved(this.alterId);
-      if (this.taxMode() && !this.cancelled && this.lines.length && (this.mode === "item" || this.taxLines().length)) {
-        // Saved tax lines that still match the calculation follow later changes;
-        // nothing is added to a saved voucher just by opening it.
-        this.taxOn = true;
-        this.adopt = true;
-        await this.refreshTax(false, true);
-      }
-      if (this.tdsMode() && !this.cancelled) {
-        // A saved TDS line that still matches follows later changes, as tax lines do.
-        this.tdsAdopt = true;
-        await this.refreshTds(false, true);
-      }
-      if (this.tcsMode()) {
-        this.tcsAdopt = true;
-        await this.refreshTcs(false, true);
-      }
+      await this.adoptAuto();
       this.loaded = this.state();
       void this.loadNotes();
+    } else if (this.copyId) {
+      await this.loadCopy(this.copyId);
+      await this.adoptAuto();
     } else {
       const [number, stock, godowns] = await Promise.all([
         api.nextVoucherNumber(this.kind, this.date),
@@ -445,6 +442,44 @@ export class VoucherScreen implements Screen {
       }
     }
     this.render();
+  }
+
+  /** Saved tax, TDS and TCS lines that still match the calculation follow later changes. */
+  private async adoptAuto(): Promise<void> {
+    if (this.taxMode() && !this.cancelled && this.lines.length && (this.mode === "item" || this.taxLines().length)) {
+      // Nothing is added to a saved voucher just by opening it.
+      this.taxOn = true;
+      this.adopt = true;
+      await this.refreshTax(false, true);
+    }
+    if (this.tdsMode() && !this.cancelled) {
+      this.tdsAdopt = true;
+      await this.refreshTds(false, true);
+    }
+    if (this.tcsMode()) {
+      this.tcsAdopt = true;
+      await this.refreshTcs(false, true);
+    }
+  }
+
+  /**
+   * A copy of a saved voucher as a new one: its lines and narration, the
+   * next number for `this.date`, and a new bill named after the old number
+   * named after the new one. Other bill references stay for the user to check.
+   */
+  private async loadCopy(id: string): Promise<void> {
+    const date = this.date;
+    await this.loadSaved(id);
+    const oldNumber = this.number;
+    this.date = date;
+    this.cancelled = false;
+    this.chequeable = false;
+    this.savedEffect.clear();
+    this.savedStock.clear();
+    this.number = await api.nextVoucherNumber(this.kind, this.date);
+    for (const bills of [this.partyBills, ...this.lines.map((l) => l.bills)]) {
+      for (const b of bills ?? []) if (b.kind === "New" && b.reference === oldNumber) b.reference = this.number;
+    }
   }
 
   /** The desk's notes on this saved voucher, under the narration. */
@@ -2077,9 +2112,11 @@ export class VoucherScreen implements Screen {
   }
 
   private async changeDate(): Promise<void> {
+    // Entries go in day by day, so a new voucher's F2 offers the next day; Enter takes it.
+    const offer = this.alterId ? this.date : D.addDays(this.date, 1);
     const v = await this.shell.dialog(
       "Voucher date",
-      [{ label: "Date", value: D.editable(this.date) }],
+      [{ label: "Date", value: D.editable(offer) }],
       ([text]) =>
         D.parseUser(text, this.date) ? null : t('"{text}" is not a date. Try {example}.', { text: ltr(text), example: ltr("19-10-2026") }),
       dateFields(["date"], () => this.date),

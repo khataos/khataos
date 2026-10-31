@@ -226,6 +226,8 @@ pub struct CompanyInfo {
     pub country: Option<CountryDto>,
     pub ledger_count: usize,
     pub voucher_count: usize,
+    /// The date of the latest voucher (cancelled ones too); `None` with no vouchers.
+    pub last_entry: Option<NaiveDate>,
     /// Sum of opening balances, debit positive; non-zero means they do not tally.
     pub opening_difference: String,
     /// Result of the last sync attempt on this device, if any.
@@ -750,6 +752,7 @@ fn info(store: &Store, book: &Book, path: &Path) -> CompanyInfo {
         country: pack.map(country_dto),
         ledger_count: book.ledgers().count(),
         voucher_count: book.vouchers().count(),
+        last_entry: book.vouchers().map(|v| v.date).max(),
         opening_difference: amt(book.opening_difference()),
         sync_status: store.setting(crate::sync::LAST).ok().flatten(),
         read_only: crate::lan::check_writable(store).is_err(),
@@ -1598,6 +1601,7 @@ pub(crate) mod tests {
         let info = open_company(&mut reopened, &f.0).unwrap();
         assert_eq!(info.name, "Demo Traders");
         assert_eq!((info.ledger_count, info.voucher_count), (5, 2));
+        assert_eq!(info.last_entry, Some(NaiveDate::from_ymd_opt(2026, 4, 2).unwrap()));
         assert_eq!(info.opening_difference, "0");
         assert_eq!(trial_balance(&reopened, None).unwrap(), before);
     }

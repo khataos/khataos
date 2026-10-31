@@ -192,6 +192,14 @@ export class Schedule3BalanceSheet extends Schedule3Report {
     this.cursor = 0;
     await this.reload();
   }
+
+  /** + and -: the previous year's column steps with the current one. */
+  protected override async stepPeriod(dir: 1 | -1): Promise<void> {
+    const { asAt, previousAsAt } = this;
+    this.asAt = D.stepDate(asAt, dir);
+    this.previousAsAt = previousAsAt && D.stepDate(previousAsAt, dir);
+    await this.loadStepped(() => Object.assign(this, { asAt, previousAsAt }));
+  }
 }
 
 function balanced(a: Schedule3Figures, b: Schedule3Figures): boolean {
@@ -268,6 +276,14 @@ export class Schedule3ProfitLoss extends Schedule3Report {
     this.prevTo = none ? null : readDate("to", v[3], this.to);
     this.cursor = 0;
     await this.reload();
+  }
+
+  /** + and -: the previous period steps with the current one. */
+  protected override async stepPeriod(dir: 1 | -1): Promise<void> {
+    const { from, to, prevFrom, prevTo } = this;
+    ({ from: this.from, to: this.to } = D.stepPeriod({ from, to }, dir));
+    if (prevFrom && prevTo) ({ from: this.prevFrom, to: this.prevTo } = D.stepPeriod({ from: prevFrom, to: prevTo }, dir));
+    await this.loadStepped(() => Object.assign(this, { from, to, prevFrom, prevTo }));
   }
 }
 
@@ -414,6 +430,14 @@ export class Schedule3Notes extends Report {
     this.previousAsAt = v[1].trim() === "" ? null : readDate("asAt", v[1], this.asAt);
     this.cursor = 0;
     await this.reload();
+  }
+
+  /** + and -: the previous year's column steps with the current one. */
+  protected override async stepPeriod(dir: 1 | -1): Promise<void> {
+    const { asAt, previousAsAt } = this;
+    this.asAt = D.stepDate(asAt, dir);
+    this.previousAsAt = previousAsAt && D.stepDate(previousAsAt, dir);
+    await this.loadStepped(() => Object.assign(this, { asAt, previousAsAt }));
   }
 }
 

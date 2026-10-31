@@ -25,7 +25,7 @@ If you've started typing, KhataOS asks before discarding the voucher. Sales and 
 
 The top shows the voucher type, its number and its date.
 
-- **Date:** press `F2` to change it. New vouchers start on the current date (see [Reports](reports.md#set-the-current-date-and-period-for-the-whole-company)).
+- **Date:** press `F2` to change it. New vouchers start on the current date (see [Reports](reports.md#set-the-current-date-and-period-for-the-whole-company)). In a new voucher, `F2` offers the next day, so for entries made day by day `F2` then `Enter` moves on a day. Type over it for any other date ([Typing dates](reports.md#typing-dates)).
 - **Number:** comes from the voucher type's series. You can't type your own number on screen; see [Numbering](#numbering).
 
 ### Payment, Receipt and Contra (single entry)
@@ -111,6 +111,15 @@ A line on a ledger kept in a foreign currency asks for a **Rate of exchange** (f
 1. Open it: `Enter` on its row in the Day Book (`K`), a ledger statement, or another list.
 2. The title says **(Alteration)**. Change what you need.
 3. Press `Ctrl+A`. KhataOS returns to where you came from.
+
+## Add or copy a voucher from the Day Book
+
+In the Day Book (`K`), put the cursor on a voucher's row:
+
+- `Alt+A` (or `Alt+I`) opens a new voucher of that type, on that row's date. It takes the next number in the series, and the Day Book lists it with that date's vouchers.
+- `Alt+2` opens a copy of the voucher as a new one: the same lines and narration, on the same date, with the next number. A new bill named after the old voucher's number is renamed to the new number. Other bill references are kept, so check them before you accept.
+
+Press `F2` in the new voucher to move it to another date. On an empty Day Book, `Alt+A` opens a Payment on the Day Book's last date.
 
 A saved voucher keeps its type: to change the type, delete it and enter a new one. Changing a saved voucher needs an Accountant (a Data Entry user can only enter new ones). Every change is kept in the audit trail.
 

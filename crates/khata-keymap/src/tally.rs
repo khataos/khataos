@@ -143,11 +143,12 @@ pub(crate) fn bindings() -> Vec<Binding> {
         ("Ctrl+U", Report, RestoreLine),
         ("PageUp", Report, PreviousRecord),
         ("PageDown", Report, NextRecord),
+        ("Plus", Report, NextPeriod),
+        ("Minus", Report, PreviousPeriod),
+        // Day Book and other registers add a voucher with Alt+A; on other
+        // reports Alt+A alters a column.
+        ("Alt+A", Register, AddVoucherAfter),
     ];
-    // Day Book's bottom bar adds vouchers with Alt+A; on other reports Alt+A
-    // alters a column. Day Book uses its own context in the UI layer, so the
-    // default report map keeps the column meaning.
-    let _ = AddVoucherAfter;
 
     table
         .iter()

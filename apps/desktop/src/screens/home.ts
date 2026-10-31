@@ -128,6 +128,7 @@ export class HomeScreen implements Screen {
         h("dt", t("Current date")), h("dd", t("{date}, {weekday}", { date: D.show(c.today), weekday: D.weekday(c.today) }), h("span.muted", " · F2")),
         h("dt", t("Ledgers")), h("dd", String(c.ledger_count)),
         h("dt", t("Vouchers")), h("dd", String(c.voucher_count)),
+        ...(c.last_entry ? [h("dt", t("Last entry")), h("dd", t("{date}, {weekday}", { date: D.show(c.last_entry), weekday: D.weekday(c.last_entry) }))] : []),
         ...(this.due
           ? [h("dt", t("Due soon")), h("dd", { class: this.due.overdue ? "warn" : "" }, t("{soon} in the next 7 days · {overdue} overdue", { soon: this.due.soon, overdue: this.due.overdue }), h("span.muted", " · T"))]
           : []),

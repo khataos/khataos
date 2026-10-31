@@ -356,3 +356,39 @@ export function addDays(isoDate: string, days: number): string {
   const dt = new Date(Date.UTC(y, m - 1, d + days));
   return `${dt.getUTCFullYear()}-${pad(dt.getUTCMonth() + 1)}-${pad(dt.getUTCDate())}`;
 }
+
+/** Days from `a` to `b` (positive when `b` is later). */
+function daysBetween(a: string, b: string): number {
+  return Math.round((Date.parse(b) - Date.parse(a)) / 86_400_000);
+}
+
+/** Is this the last day of its month? */
+function monthEnd(isoDate: string): boolean {
+  const [y, m, d] = parts(isoDate);
+  return d === lastDay(y, m);
+}
+
+/**
+ * + and - in a report: the next (dir 1) or previous (-1) period of the same
+ * length. Whole months step by their number of months (Q2 to Q3, a year to
+ * the next, February to March); other periods by their number of days.
+ */
+export function stepPeriod(p: Period, dir: 1 | -1): Period {
+  const [fy, fm, fd] = parts(p.from);
+  const [ty, tm] = parts(p.to);
+  if (fd === 1 && monthEnd(p.to) && p.from <= p.to) {
+    const months = (ty - fy) * 12 + (tm - fm) + 1;
+    const from = addMonths(p.from, dir * months);
+    const [ny, nm] = parts(addMonths(`${ty}-${pad(tm)}-01`, dir * months));
+    return { from, to: `${ny}-${pad(nm)}-${pad(lastDay(ny, nm))}` };
+  }
+  const days = (daysBetween(p.from, p.to) + 1) * dir;
+  return { from: addDays(p.from, days), to: addDays(p.to, days) };
+}
+
+/** + and - on an "as at" report: a month's last day steps to the next month's; any other date by a day. */
+export function stepDate(isoDate: string, dir: 1 | -1): string {
+  if (!monthEnd(isoDate)) return addDays(isoDate, dir);
+  const [y, m] = parts(addMonths(isoDate.slice(0, 8) + "01", dir));
+  return `${y}-${pad(m)}-${pad(lastDay(y, m))}`;
+}

@@ -24,6 +24,11 @@ pub enum Key {
     PageDown,
     Home,
     End,
+    /// The + key (main keyboard or keypad), named so it doesn't read as a
+    /// separator: "Plus".
+    Plus,
+    /// The - key: "Minus".
+    Minus,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
@@ -88,6 +93,8 @@ fn parse_key(k: &str) -> Result<Key, ChordParseError> {
         "pagedown" | "pgdn" => Key::PageDown,
         "home" => Key::Home,
         "end" => Key::End,
+        "plus" => Key::Plus,
+        "minus" => Key::Minus,
         _ => {
             if let Some(n) = lower.strip_prefix('f').and_then(|n| n.parse::<u8>().ok()) {
                 if (1..=12).contains(&n) {
@@ -138,6 +145,8 @@ mod tests {
             "Esc",
             "PageUp",
             "K",
+            "Plus",
+            "Minus",
         ] {
             let c: Chord = s.parse().unwrap();
             assert_eq!(c.to_string(), s);

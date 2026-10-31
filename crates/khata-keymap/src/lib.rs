@@ -29,6 +29,9 @@ pub enum Context {
     Master,
     /// A report such as Day Book or Balance Sheet.
     Report,
+    /// A voucher register such as Day Book, over `Report`: Alt+A adds a
+    /// voucher there, where other reports alter a column.
+    Register,
     /// A field whose value is picked from a list (ledger, group, state…).
     ListField,
     /// An amount field.
@@ -169,6 +172,9 @@ pub enum Action {
     SelectLine,
     SelectAll,
     InvertSelection,
+    /// + and - in a report: the next or previous period of the same length.
+    NextPeriod,
+    PreviousPeriod,
     AddVoucherAfter,
     InsertVoucherBefore,
     DuplicateVoucher,
@@ -380,6 +386,32 @@ mod tests {
                 "{ctx:?}"
             );
         }
+    }
+
+    #[test]
+    fn plus_minus_step_reports_and_registers_add() {
+        let km = Keymap::tally_prime();
+        assert_eq!(
+            km.resolve(k("Plus"), &[Report, Global]),
+            Some(Action::NextPeriod)
+        );
+        assert_eq!(
+            km.resolve(k("Minus"), &[Register, Report, Global]),
+            Some(Action::PreviousPeriod)
+        );
+        assert_eq!(
+            km.resolve(k("Minus"), &[Voucher, Global]),
+            None,
+            "amounts keep their minus"
+        );
+        assert_eq!(
+            km.resolve(k("Alt+A"), &[Register, Report, Global]),
+            Some(Action::AddVoucherAfter)
+        );
+        assert_eq!(
+            km.resolve(k("Alt+A"), &[Report, Global]),
+            Some(Action::AlterColumn)
+        );
     }
 
     #[test]

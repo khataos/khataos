@@ -23,6 +23,8 @@ KhataOS is an independent project, not a copy of Tally, and it is not affiliated
 | Drill down | `Enter` on a report row goes one level down, to the voucher in the end. `Esc` comes back to the same row |
 | Date and period | `F2` and `Alt+F2`, on the home menu (for the company) or in a report (for that report) |
 | Typing dates | Day first: `19`, `19-10`, `1-4-25`. A date without a year falls in the financial year. Also `t` today, `+1` next day, and periods in one field: `Apr`, `Q2`, `2026-27`, `FY27`, `AY 2027-28` ([Typing dates](reports.md#typing-dates)) |
+| Next or previous period in a report | `+` and `-` step a report by a period of the same length: a month, a quarter, a year or a number of days ([Change the date or period](reports.md#change-the-date-or-period-of-a-report)) |
+| Add or duplicate from the Day Book | `Alt+A` or `Alt+I` adds a voucher on the row's date; `Alt+2` copies the row's voucher as a new one ([Add or copy a voucher](vouchers.md#add-or-copy-a-voucher-from-the-day-book)) |
 | Cancel and delete a voucher | `Alt+X` cancels and keeps the number; `Alt+D` deletes, after asking |
 | Detailed Stock Summary | `Alt+F5` (or `Alt+F1`) |
 | Company, import, exchange and share menus | `Alt+K`, `Alt+O`, `Alt+Z`, `Alt+M` |
@@ -60,7 +62,6 @@ Pressing a reserved key for one of these says "isn't available in this version y
 
 - Sales and Purchase Orders, Delivery and Receipt Notes, Rejections In and Out, Physical Stock, Payroll (`Ctrl+F8`, `Ctrl+F9`, `Alt+F8`, `Alt+F9`, `Ctrl+F6`, `Ctrl+F5`, `Ctrl+F7`, `Ctrl+F4`).
 - Optional, postdated, memorandum and reversing vouchers (`Ctrl+L`, `Ctrl+T`).
-- Duplicate or insert a voucher from the Day Book (`Alt+2`, `Alt+I`).
 - Repeat the last narration (`Ctrl+R`, `Alt+R`), unused voucher numbers (`Ctrl+Alt+U`), stock query (`Alt+S`).
 - Custom voucher types with their own series (imported custom types become their base type), and manual voucher numbers.
 - Interest calculation.

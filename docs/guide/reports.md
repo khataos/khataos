@@ -41,6 +41,8 @@ You can also click a row to select it and double click to open it.
 
 This changes only the report on screen.
 
+`+` and `-` move the report to the next or previous period of the same length, without a dialog. A month goes to the next month, a quarter to the next quarter and a financial year to the next year. Other periods move by their number of days: one day becomes the next day, and 1 to 7 October becomes 8 to 14 October. An "as at" report moves from one month end to the next, or by one day from any other date. The quarterly TDS returns and GSTR-9 move a quarter or a year. Schedule III moves its previous period column along with the current one.
+
 ### Typing dates
 
 Dates are always **day first**. A missing month comes from the date already in the field. A missing year puts the date in that field's financial year: in 2026-27, `1-4` is 1 April 2026 and `31-3` is 31 March 2027.
@@ -165,6 +167,6 @@ These report keys that Tally users know are reserved but not built. See the [key
 - Filters (`Ctrl+F`), extra columns and period comparison (`Alt+C`, `Alt+N`), saved views (`Ctrl+L`).
 - Detailed view (`Alt+F5`) anywhere except Stock Summary, and expand one line (`Shift+Enter`).
 - Change the report's subject (`F4`), basis of values (`Ctrl+B`), exception reports (`Ctrl+J`).
-- Duplicate or insert a voucher from the Day Book (`Alt+2`, `Alt+I`), hide and show rows (`Ctrl+R`, `Ctrl+U`).
+- Hide and show rows (`Ctrl+R`, `Ctrl+U`).
 - Sales, purchase and journal registers, ledger monthly summaries, cash and bank books, cash flow and funds flow.
 - Email and WhatsApp (`Ctrl+M`, `Ctrl+Alt+W`).
