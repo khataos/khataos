@@ -1296,6 +1296,14 @@ mark {
   margin-bottom: 8px;
 }
 
+/* What the typed date, period or year means (datefields.ts). */
+.dialog-note {
+  max-width: 300px;
+  min-height: 1.4em;
+  color: var(--muted);
+  font-size: max(var(--text-min), 12.5px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;

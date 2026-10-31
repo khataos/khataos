@@ -3532,4 +3532,10 @@ export const AR: Record<string, string> = {
   "UQC": "⁦UQC⁩",
   "GSTR-9 (annual return) and portal reconciliation": "⁦GSTR-9⁩ (الإقرار السنوي) والمطابقة مع البوابة",
   "GSTR-9 against the portal": "⁦GSTR-9⁩ مقابل البوابة",
+
+  // ------------------------------------------- date shortcuts (datefields.ts)
+  "t today · y yesterday · +1 next day · 1-4 · Apr · Q2 · 2026-27 · AY 2027-28": "⁦t⁩ اليوم · ⁦y⁩ أمس · ⁦+1⁩ اليوم التالي · ⁦1-4⁩ · أبريل · ⁦Q2⁩ · ⁦2026-27⁩ · ⁦AY 2027-28⁩", // ar: check (shortcuts are typed in Latin letters)
+  "2026-27 · 26-27 · FY27 · AY 2027-28 · last year": "⁦2026-27⁩ · ⁦26-27⁩ · ⁦FY27⁩ · ⁦AY 2027-28⁩ · ⁦last year⁩ (السنة الماضية)", // ar: check (shortcuts are typed in Latin letters)
+  "2026 · this year · last year": "⁦2026⁩ · ⁦this year⁩ (هذه السنة) · ⁦last year⁩ (السنة الماضية)", // ar: check (shortcuts are typed in Latin letters)
+  "1 (Apr-Jun) · 2 (Jul-Sep) · 3 (Oct-Dec) · 4 (Jan-Mar)": "1 (أبريل-يونيو) · 2 (يوليو-سبتمبر) · 3 (أكتوبر-ديسمبر) · 4 (يناير-مارس)",
 };

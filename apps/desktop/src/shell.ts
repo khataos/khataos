@@ -4,6 +4,7 @@
 import { api } from "./api";
 import { CalcPanel } from "./calcpanel";
 import * as D from "./dates";
+import { dateFields, readDate } from "./datefields";
 import { clear, h, hotkeyLabel } from "./dom";
 // `tr`, not `t`: this file's locals call the top screen `t`.
 import { language, saveLanguage, savedLanguage, setLanguage, t as tr, type Lang } from "./i18n";
@@ -577,8 +578,11 @@ export class Shell {
    *  return periods, until the company is closed. */
   private async askCurrentDate(): Promise<void> {
     const ref = this.company?.today ?? D.todayIso();
-    const v = await this.dialog("Change current date", [{ label: "Current date", value: D.editable(ref) }], ([a]) =>
-      D.parseUser(a, ref) ? null : tr('"{text}" is not a date.', { text: a }),
+    const v = await this.dialog(
+      "Change current date",
+      [{ label: "Current date", value: D.editable(ref) }],
+      ([a]) => (D.parseUser(a, ref) ? null : tr('"{text}" is not a date.', { text: a })),
+      dateFields(["date"], () => ref),
     );
     const date = v && D.parseUser(v[0], ref);
     if (!date || !this.company) return;
@@ -590,7 +594,7 @@ export class Shell {
 
   /** Alt+F2 outside a report: the current period every report opens with, until the company
    *  is closed. Leave To blank for the whole financial year that From falls in, so "1-4-25"
-   *  alone moves to 2025-26. */
+   *  alone moves to 2025-26; or type a period in From: "2025-26", "AY 2026-27", "Q1". */
   private async askCurrentPeriod(): Promise<void> {
     const ref = this.periodTo();
     const v = await this.dialog(
@@ -600,17 +604,18 @@ export class Shell {
         { label: "To (blank: end of that financial year)", value: D.editable(this.periodTo()) },
       ],
       ([a, b]) => {
-        const f = D.parseUser(a, ref);
+        const f = readDate("from", a, ref);
         if (!f) return tr('"{text}" is not a date.', { text: a });
         if (!b.trim()) return null;
-        const t = D.parseUser(b, ref);
+        const t = readDate("to", b, ref);
         if (!t) return tr('"{text}" is not a date.', { text: b });
         return f > t ? tr("The period ends before it starts.") : null;
       },
+      dateFields(["from", "to"], () => ref),
     );
-    const from = v && D.parseUser(v[0], ref);
+    const from = v && readDate("from", v[0], ref);
     if (!v || !from || !this.company) return;
-    const to = v[1].trim() ? D.parseUser(v[1], ref) : D.fyEnd(D.fyStart(from, this.fyStartMonth()));
+    const to = v[1].trim() ? readDate("to", v[1], ref) : D.fyEnd(D.fyStart(from, this.fyStartMonth()));
     if (!to) return;
     this.currentPeriod = { from, to };
     this.info(tr("Current period: {from} to {to}.", { from: D.show(from), to: D.show(to) }));
@@ -709,6 +714,7 @@ export class Shell {
 
   async openCompany(info: CompanyInfo): Promise<void> {
     this.company = info;
+    D.setFyStartMonth(this.fyStartMonth());
     this.currentDate = null;
     this.currentPeriod = null;
     useGroupingOf(info.country?.code);
@@ -772,6 +778,7 @@ export class Shell {
     this.session = null;
     this.currentDate = null;
     this.currentPeriod = null;
+    D.setFyStartMonth(1);
     setDisplayCountry(undefined);
     loadDisplay();
     await this.reset(this.hooks.startup());
@@ -782,6 +789,7 @@ export class Shell {
     try {
       this.company = await api.companyInfo();
       if (this.currentDate) this.company.today = this.currentDate;
+      D.setFyStartMonth(this.fyStartMonth());
       useGroupingOf(this.company.country?.code);
       setDisplayCountry(this.company.country?.code);
     } catch {
@@ -1004,32 +1012,55 @@ export class Shell {
 
   /**
    * A small field dialog (F2 date, period). Enter moves to the next field and
-   * accepts on the last one; Esc clears a field first, then cancels.
+   * accepts on the last one; Esc clears a field first, then cancels. `leave` may
+   * rewrite the fields as Enter leaves one ("Q2" in From fills From and To), and
+   * `note` says under the fields what the one being typed in means.
    */
   dialog(
     title: string,
     fields: { label: string; value: string }[],
     validate: (values: string[]) => string | null,
+    opts: { leave?: (at: number, values: string[]) => string[] | null; note?: (at: number, values: string[]) => string } = {},
   ): Promise<string[] | null> {
     return new Promise((resolve) => {
       const inputs = fields.map((f) => h("input.field", { value: f.value, spellcheck: false }));
+      const note = h("div.dialog-note", { "aria-live": "polite" });
       let at = 0;
+      const values = () => inputs.map((i) => i.value);
+      const renote = () => {
+        if (opts.note) note.textContent = opts.note(at, values());
+      };
       const go = (i: number) => {
         at = i;
         inputs[i].focus();
         inputs[i].select();
+        renote();
+      };
+      const leave = () => {
+        const next = opts.leave?.(at, values());
+        next?.forEach((v, i) => {
+          if (inputs[i]) inputs[i].value = v;
+        });
       };
       const finish = (v: string[] | null) => {
         this.closeModal(m);
         resolve(v);
       };
       const accept = () => {
-        const values = inputs.map((i) => i.value);
-        const problem = validate(values);
+        leave();
+        const v = values();
+        const problem = validate(v);
         if (problem) this.warn(problem);
-        else finish(values);
+        else finish(v);
       };
-      inputs.forEach((inp, i) => inp.addEventListener("focus", () => (at = i)));
+      inputs.forEach((inp, i) => {
+        inp.addEventListener("focus", () => {
+          at = i;
+          renote();
+        });
+        inp.addEventListener("input", renote);
+      });
+      renote();
       const m: Screen = {
         title,
         el: h(
@@ -1037,6 +1068,7 @@ export class Shell {
           { role: "dialog", "aria-label": tr(title) },
           h("div.dialog-title", tr(title)),
           ...fields.map((f, i) => h("label.dialog-row", h("span", tr(f.label)), inputs[i])),
+          ...(opts.note ? [note] : []),
         ),
         contexts: () => ["Dialog"],
         focus: () => go(at),
@@ -1044,6 +1076,7 @@ export class Shell {
           if (e.chord === "Esc") {
             if (inputs[at].value) {
               inputs[at].value = "";
+              renote();
               return true;
             }
             finish(null);
@@ -1058,7 +1091,10 @@ export class Shell {
         action: (a) => {
           if (a === "Accept") accept();
           else if (a === "NextField") {
-            if (at < inputs.length - 1) go(at + 1);
+            if (at < inputs.length - 1) {
+              leave();
+              go(at + 1);
+            }
             else accept();
           } else if (a === "PreviousField") {
             if (at > 0) go(at - 1);

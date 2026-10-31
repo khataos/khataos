@@ -43,6 +43,7 @@ jobs:
           cache-dependency-path: apps/desktop/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
+      - run: pnpm dates-check
       # Lists t("…") strings with no Arabic translation. It always exits 0,
       # so this step reports missing strings without failing the build.
       - run: pnpm strings --missing

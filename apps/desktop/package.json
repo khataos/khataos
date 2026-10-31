@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "strings": "node scripts/strings.mjs",
     "calc-check": "node scripts/calc-check.mjs",
+    "dates-check": "node scripts/dates-check.mjs",
     "tauri": "tauri",
     "app:dev": "tauri dev --config src-tauri/tauri.dev.conf.json",
     "app:build": "tauri build"

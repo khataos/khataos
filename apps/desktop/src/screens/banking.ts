@@ -182,7 +182,7 @@ export class BankReconciliationReport extends Report {
     const text = this.editor.value.trim();
     let date = "";
     if (text) {
-      const d = D.parseUser(text, line.date);
+      const d = D.parseUser(text, line.date, true);
       if (!d) return this.shell.warn(t('"{text}" is not a date.', { text }));
       if (d < line.date) return this.shell.warn(t("The bank date can't be before the voucher date ({date}).", { date: D.show(line.date) }));
       date = d;

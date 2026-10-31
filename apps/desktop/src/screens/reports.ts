@@ -4,6 +4,7 @@
 import { api } from "../api";
 import { h } from "../dom";
 import * as D from "../dates";
+import { dateFields, readDate } from "../datefields";
 // `tr`: some reports keep a total in a local `t`.
 import { language, ltr, t as tr } from "../i18n";
 import * as M from "../money";
@@ -286,21 +287,26 @@ export abstract class Report implements Screen {
         { label: "To", value: D.editable(to) },
       ],
       ([a, b]) => {
-        const f = D.parseUser(a, ref);
-        const t = D.parseUser(b, ref);
+        const f = readDate("from", a, ref);
+        const t = readDate("to", b, ref);
         if (!f) return tr('"{text}" is not a date.', { text: a });
         if (!t) return tr('"{text}" is not a date.', { text: b });
         return f > t ? tr("The period ends before it starts.") : null;
       },
+      dateFields(["from", "to"], () => ref),
     );
-    return v ? [D.parseUser(v[0], ref)!, D.parseUser(v[1], ref)!] : null;
+    return v ? [readDate("from", v[0], ref)!, readDate("to", v[1], ref)!] : null;
   }
 
+  /** "As at": a date, or a period for its last day ("Mar", "2025-26", "last quarter"). */
   protected async dateDialog(asAt: string): Promise<string | null> {
-    const v = await this.shell.dialog("Change date", [{ label: "As at", value: D.editable(asAt) }], ([a]) =>
-      D.parseUser(a, asAt) ? null : tr('"{text}" is not a date.', { text: a }),
+    const v = await this.shell.dialog(
+      "Change date",
+      [{ label: "As at", value: D.editable(asAt) }],
+      ([a]) => (readDate("asAt", a, asAt) ? null : tr('"{text}" is not a date.', { text: a })),
+      dateFields(["asAt"], () => asAt),
     );
-    return v ? D.parseUser(v[0], asAt) : null;
+    return v ? readDate("asAt", v[0], asAt) : null;
   }
 
   protected async reload(): Promise<void> {

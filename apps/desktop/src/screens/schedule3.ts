@@ -8,6 +8,7 @@
 import { api, schedule3Api } from "../api";
 import { h } from "../dom";
 import * as D from "../dates";
+import { dateFields, readDate } from "../datefields";
 import { inUse, t as tr } from "../i18n";
 import * as M from "../money";
 import type { Shell } from "../shell";
@@ -176,17 +177,18 @@ export class Schedule3BalanceSheet extends Schedule3Report {
         { label: "Previous year as at (blank: none)", value: this.previousAsAt ? D.editable(this.previousAsAt) : "" },
       ],
       ([a, p]) => {
-        const at = D.parseUser(a, ref);
+        const at = readDate("asAt", a, ref);
         if (!at) return tr('"{text}" is not a date.', { text: a });
         if (p.trim() === "") return null;
-        const prev = D.parseUser(p, at);
+        const prev = readDate("asAt", p, at);
         if (!prev) return tr('"{text}" is not a date.', { text: p });
         return prev >= at ? tr("The previous date must be before the current one.") : null;
       },
+      dateFields(["asAt", "asAt"], (i, [a]) => (i === 0 ? ref : (readDate("asAt", a, ref) ?? ref))),
     );
     if (!v) return;
-    this.asAt = D.parseUser(v[0], ref)!;
-    this.previousAsAt = v[1].trim() === "" ? null : D.parseUser(v[1], this.asAt);
+    this.asAt = readDate("asAt", v[0], ref)!;
+    this.previousAsAt = v[1].trim() === "" ? null : readDate("asAt", v[1], this.asAt);
     this.cursor = 0;
     await this.reload();
   }
@@ -241,25 +243,29 @@ export class Schedule3ProfitLoss extends Schedule3Report {
         { label: "Previous to", value: show(this.prevTo) },
       ],
       ([a, b, c, d]) => {
-        const f = D.parseUser(a, ref);
-        const t = D.parseUser(b, ref);
+        const f = readDate("from", a, ref);
+        const t = readDate("to", b, ref);
         if (!f) return tr('"{text}" is not a date.', { text: a });
         if (!t) return tr('"{text}" is not a date.', { text: b });
         if (f > t) return tr("The period ends before it starts.");
         if (c.trim() === "" && d.trim() === "") return null;
-        const pf = D.parseUser(c, f);
-        const pt = D.parseUser(d, t);
+        const pf = readDate("from", c, f);
+        const pt = readDate("to", d, t);
         if (!pf) return tr('"{text}" is not a date.', { text: c });
         if (!pt) return tr('"{text}" is not a date.', { text: d });
         return pf > pt ? tr("The previous period ends before it starts.") : null;
       },
+      // The previous period's missing parts come from the current one.
+      dateFields(["from", "to", "from", "to"], (i, [a, b]) =>
+        i < 2 ? ref : ((i === 2 ? readDate("from", a, ref) : readDate("to", b, ref)) ?? ref),
+      ),
     );
     if (!v) return;
-    this.from = D.parseUser(v[0], ref)!;
-    this.to = D.parseUser(v[1], ref)!;
+    this.from = readDate("from", v[0], ref)!;
+    this.to = readDate("to", v[1], ref)!;
     const none = v[2].trim() === "" && v[3].trim() === "";
-    this.prevFrom = none ? null : D.parseUser(v[2], this.from);
-    this.prevTo = none ? null : D.parseUser(v[3], this.to);
+    this.prevFrom = none ? null : readDate("from", v[2], this.from);
+    this.prevTo = none ? null : readDate("to", v[3], this.to);
     this.cursor = 0;
     await this.reload();
   }
@@ -394,17 +400,18 @@ export class Schedule3Notes extends Report {
         { label: "Previous year as at (blank: none)", value: this.previousAsAt ? D.editable(this.previousAsAt) : "" },
       ],
       ([a, p]) => {
-        const at = D.parseUser(a, ref);
+        const at = readDate("asAt", a, ref);
         if (!at) return tr('"{text}" is not a date.', { text: a });
         if (p.trim() === "") return null;
-        const prev = D.parseUser(p, at);
+        const prev = readDate("asAt", p, at);
         if (!prev) return tr('"{text}" is not a date.', { text: p });
         return prev >= at ? tr("The previous date must be before the current one.") : null;
       },
+      dateFields(["asAt", "asAt"], (i, [a]) => (i === 0 ? ref : (readDate("asAt", a, ref) ?? ref))),
     );
     if (!v) return;
-    this.asAt = D.parseUser(v[0], ref)!;
-    this.previousAsAt = v[1].trim() === "" ? null : D.parseUser(v[1], this.asAt);
+    this.asAt = readDate("asAt", v[0], ref)!;
+    this.previousAsAt = v[1].trim() === "" ? null : readDate("asAt", v[1], this.asAt);
     this.cursor = 0;
     await this.reload();
   }

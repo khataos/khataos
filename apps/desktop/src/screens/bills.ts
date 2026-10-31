@@ -327,7 +327,7 @@ export class BillScreen implements Screen {
     }
     if (this.c === "due") {
       if (inp.value.trim()) {
-        const d = D.parseUser(inp.value, this.o.date);
+        const d = D.parseUser(inp.value, this.o.date, true);
         if (!d) return this.shell.warn(t('"{text}" is not a date. Leave it blank if there is no due date.', { text: inp.value }));
         row.due = d;
         inp.value = D.editable(d);

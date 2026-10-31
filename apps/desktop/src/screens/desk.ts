@@ -46,7 +46,7 @@ export async function editNote(shell: Shell, opts: { link?: NoteLink; note?: Not
     ],
     ([title, , due]) => {
       if (!title.trim()) return t("A note needs a title.");
-      if (due.trim() && !D.parseUser(due, ref)) return t('"{text}" is not a date.', { text: due });
+      if (due.trim() && !D.parseUser(due, ref, true)) return t('"{text}" is not a date.', { text: due });
       return null;
     },
   );
@@ -57,7 +57,7 @@ export async function editNote(shell: Shell, opts: { link?: NoteLink; note?: Not
       id: n?.id ?? null,
       title,
       text,
-      due: due.trim() ? D.parseUser(due, ref) : null,
+      due: due.trim() ? D.parseUser(due, ref, true) : null,
       done: n?.done ?? false,
       link_kind: n?.link?.kind ?? opts.link?.kind ?? null,
       link_id: n?.link?.id ?? opts.link?.id ?? null,

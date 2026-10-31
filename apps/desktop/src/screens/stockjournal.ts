@@ -12,6 +12,7 @@
 import { api } from "../api";
 import { h } from "../dom";
 import * as D from "../dates";
+import { dateFields } from "../datefields";
 import { language, ltr, t } from "../i18n";
 import * as M from "../money";
 import { ListPicker, type PickAction, type PickItem } from "../picker";
@@ -980,8 +981,12 @@ export class StockJournalScreen implements Screen {
   }
 
   private async changeDate(): Promise<void> {
-    const v = await this.shell.dialog("Voucher date", [{ label: "Date", value: D.editable(this.date) }], ([text]) =>
-      D.parseUser(text, this.date) ? null : t('"{text}" is not a date. Try 19-10-2026.', { text }),
+    const v = await this.shell.dialog(
+      "Voucher date",
+      [{ label: "Date", value: D.editable(this.date) }],
+      ([text]) =>
+        D.parseUser(text, this.date) ? null : t('"{text}" is not a date. Try 19-10-2026.', { text }),
+      dateFields(["date"], () => this.date),
     );
     if (!v) return;
     const was = this.date;

@@ -35,6 +35,7 @@ import { api, tcsApi, tdsApi } from "../api";
 import { fxApi } from "../forex-api";
 import { h } from "../dom";
 import * as D from "../dates";
+import { dateFields } from "../datefields";
 import { hijriOn, language, ltr, t } from "../i18n";
 import { letterOf } from "../keys";
 import * as M from "../money";
@@ -2076,8 +2077,12 @@ export class VoucherScreen implements Screen {
   }
 
   private async changeDate(): Promise<void> {
-    const v = await this.shell.dialog("Voucher date", [{ label: "Date", value: D.editable(this.date) }], ([text]) =>
-      D.parseUser(text, this.date) ? null : t('"{text}" is not a date. Try {example}.', { text: ltr(text), example: ltr("19-10-2026") }),
+    const v = await this.shell.dialog(
+      "Voucher date",
+      [{ label: "Date", value: D.editable(this.date) }],
+      ([text]) =>
+        D.parseUser(text, this.date) ? null : t('"{text}" is not a date. Try {example}.', { text: ltr(text), example: ltr("19-10-2026") }),
+      dateFields(["date"], () => this.date),
     );
     if (!v) return;
     const was = this.date;

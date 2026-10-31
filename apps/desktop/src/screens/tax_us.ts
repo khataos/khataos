@@ -8,6 +8,7 @@ import "../gst.css";
 import { api, usApi, usExtraApi } from "../api";
 import { h } from "../dom";
 import * as D from "../dates";
+import { yearNote } from "../datefields";
 import { t } from "../i18n";
 import * as M from "../money";
 import type { KeyEv, Shell } from "../shell";
@@ -148,11 +149,14 @@ export class Us1099ReportScreen extends Report {
 
   /** The period is a calendar year. */
   protected override async askPeriod(): Promise<void> {
-    const v = await this.shell.dialog("Calendar year", [{ label: "Year", value: String(this.year) }], ([y]) =>
-      /^\d{4}$/.test(y.trim()) ? null : t("Type a year such as 2026."),
+    const v = await this.shell.dialog(
+      "Calendar year",
+      [{ label: "Year", value: String(this.year) }],
+      ([y]) => (D.parseYear(y, 1) !== null ? null : t("Type a year such as 2026.")),
+      { note: (_, [y]) => yearNote(y, 1) },
     );
     if (!v) return;
-    this.year = Number(v[0].trim());
+    this.year = D.parseYear(v[0], 1)!;
     this.cursor = 0;
     await this.reload();
   }

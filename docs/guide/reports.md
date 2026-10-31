@@ -43,18 +43,46 @@ This changes only the report on screen.
 
 ### Typing dates
 
-Dates are always **day first**. Anything you leave out comes from the date already in the field.
+Dates are always **day first**. A missing month comes from the date already in the field. A missing year puts the date in that field's financial year: in 2026-27, `1-4` is 1 April 2026 and `31-3` is 31 March 2027.
 
 | You type | You get |
 |---|---|
 | `19` | the 19th of the same month and year |
-| `19-10` or `19/10` | 19 October, same year |
+| `19-10` or `19/10` | 19 October, in the same financial year |
 | `1-4-25` | 1 April 2025 (years with two digits are 20xx) |
-| `19 oct 2026`, `19-Oct` | 19 October 2026, 19 October |
+| `19 oct 2026`, `19-Oct`, `Oct 19` | 19 October 2026, 19 October |
 | `19.10.2026` | 19 October 2026 |
+| `1910`, `191026`, `19102026` | 19 October, without separators |
 | `2026-10-19` | 19 October 2026 |
+| `t` or `today`, `y` or `yesterday` | today, yesterday |
+| `+1`, `-1` | the day after or before the date in the field |
+| `+2w`, `+1m`, `-1y` | two weeks, a month or a year from it |
 
-Arabic month names and Arabic-Indic digits work too.
+Arabic month names and Arabic-Indic digits work too. While you type, the line under the fields shows the date you'll get, with its weekday.
+
+### Typing a period in one field
+
+In **From**, type a whole period and press `Enter`: KhataOS fills **From** and **To** for you.
+
+| You type | You get (company with years from April, in 2026-27) |
+|---|---|
+| `Apr`, `April` | 1 to 30 April 2026 |
+| `Feb 2028`, `2026-09`, `9-2026` | that month |
+| `Q1` to `Q4` | a quarter of the financial year: `Q1` is April to June, `Q4` January to March |
+| `Q2 2025-26`, `Q3 FY27` | a quarter of another year |
+| `H1`, `H2` | the first or second half of the year |
+| `2026-27`, `26-27`, `2026` | the financial year 1 April 2026 to 31 March 2027 |
+| `FY27`, `FY 2027` | the financial year ending in 2027, that is 2026-27 |
+| `AY 2027-28`, `AY27-28` | the **assessment year** 2027-28, which taxes the financial year 2026-27 |
+| `TY 2026-27` | the tax year 2026-27 (India from April 2026), the same as the financial year |
+| `YA 2027` | Singapore's year of assessment 2027, which taxes the financial year that ended in 2026 |
+| `this month`, `last month`, `this quarter`, `last quarter`, `this year`, `last year` | around today |
+| `mtd`, `qtd`, `ytd` | from the start of this month, quarter or financial year to today |
+| `1-4 to 30-6` | the two dates |
+
+In **To**, a period means its last day: `Jun` is 30 June. A report "as at" a date reads it the same way: `Mar` or `2025-26` gives 31 March 2026.
+
+Fields that take a year (GSTR-9, the TDS quarterly statements and the salary TDS estimate) accept the same years: `2025-26`, `FY26`, `AY 2026-27` or `last year`. In the TDS quarter dialog, `Q2 2026-27` in the year field fills both fields.
 
 ## Set the current date and period for the whole company
 
@@ -70,7 +98,7 @@ New vouchers take this date, and the Day Book opens on it.
 **Current period (`Alt+F2` on the home menu):**
 
 1. On the home menu, press `Alt+F2`.
-2. Type **From**. Leave **To** blank for the whole financial year that From falls in: `1-4-25` alone gives 1 April 2025 to 31 March 2026.
+2. Type **From**. Leave **To** blank for the whole financial year that From falls in: `1-4-25` alone gives 1 April 2025 to 31 March 2026. Or type the year itself in From: `2025-26`, `FY26` or `AY 2026-27`.
 3. Press `Enter`.
 
 Reports you open after this use the new period. Reports already open keep theirs. The home screen shows both the current period and the current date.

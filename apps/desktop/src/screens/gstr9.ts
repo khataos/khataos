@@ -14,6 +14,7 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import { api, gstr9Api } from "../api";
 import { h } from "../dom";
 import * as D from "../dates";
+import { yearNote } from "../datefields";
 import { ltr, t as tr } from "../i18n";
 import * as M from "../money";
 import type { KeyEv, Shell } from "../shell";
@@ -338,11 +339,15 @@ export class Gstr9Report extends Report {
   }
 
   protected override async askPeriod(): Promise<void> {
-    const v = await this.shell.dialog("Change year", [{ label: "Financial year", value: yearLabel(this.year) }], ([y]) =>
-      /^\s*\d{4}(-\d{2})?\s*$/.test(y) && Number(y.trim().slice(0, 4)) >= 2017 ? null : tr('"{text}" is not a financial year (e.g. 2026-27).', { text: ltr(y) }),
+    // "2025-26", "FY26", "AY 2026-27" or "last year".
+    const v = await this.shell.dialog(
+      "Change year",
+      [{ label: "Financial year", value: yearLabel(this.year) }],
+      ([y]) => ((D.parseYear(y, 4) ?? 0) >= 2017 ? null : tr('"{text}" is not a financial year (e.g. 2026-27).', { text: ltr(y) })),
+      { note: (_, [y]) => yearNote(y, 4) },
     );
     if (!v) return;
-    this.year = Number(v[0].trim().slice(0, 4));
+    this.year = D.parseYear(v[0], 4)!;
     this.cursor = 0;
     await this.reload();
   }

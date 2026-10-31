@@ -10,6 +10,7 @@ import "../gst.css";
 import { api, tcsApi, tdsApi, tdsStatementApi } from "../api";
 import { h } from "../dom";
 import * as D from "../dates";
+import { yearNote } from "../datefields";
 import { ltr, t as tr } from "../i18n";
 import * as M from "../money";
 import { save } from "@tauri-apps/plugin-dialog";
@@ -412,6 +413,9 @@ abstract class QuarterReport extends Report {
   }
 
   protected override async askPeriod(): Promise<void> {
+    // The year as "2026-27", "FY27", "AY 2027-28" or "last year"; "Q2 2026-27"
+    // or "Q2" in it fills both fields. The quarter as "2" or "Q2".
+    const quarter = (q: string) => /^\s*q?([1-4])\s*$/i.exec(q)?.[1];
     const v = await this.shell.dialog(
       "Change quarter",
       [
@@ -419,14 +423,24 @@ abstract class QuarterReport extends Report {
         { label: "Quarter (1-4)", value: String(this.quarter) },
       ],
       ([y, q]) => {
-        if (!/^\s*\d{4}(-\d{2})?\s*$/.test(y)) return tr('"{text}" is not a financial year (e.g. 2026-27).', { text: ltr(y) });
-        if (!/^\s*[1-4]\s*$/.test(q)) return "The quarter is 1 (Apr-Jun) to 4 (Jan-Mar).";
+        if (D.parseYear(y, 4) === null) return tr('"{text}" is not a financial year (e.g. 2026-27).', { text: ltr(y) });
+        if (!quarter(q)) return "The quarter is 1 (Apr-Jun) to 4 (Jan-Mar).";
         return null;
+      },
+      {
+        leave: (at, [y]) => {
+          if (at !== 0) return null;
+          const both = /^\s*q([1-4])\b\s*(.*)$/i.exec(y);
+          if (!both) return null;
+          const year = both[2].trim() ? D.parseYear(both[2], 4) : quarterOf(today(this.shell))[0];
+          return year === null ? null : [yearLabel(year), both[1]];
+        },
+        note: (at, [y]) => (at === 0 ? yearNote(y.replace(/^\s*q[1-4]\b\s*/i, ""), 4) : tr("1 (Apr-Jun) · 2 (Jul-Sep) · 3 (Oct-Dec) · 4 (Jan-Mar)")),
       },
     );
     if (!v) return;
-    this.year = Number(v[0].trim().slice(0, 4));
-    this.quarter = Number(v[1].trim());
+    this.year = D.parseYear(v[0], 4)!;
+    this.quarter = Number(quarter(v[1]));
     this.cursor = 0;
     await this.reload();
   }
@@ -875,7 +889,7 @@ export class SalaryTdsEstimateReport extends Report {
         { label: "Resident in India (y/n)", value: i.non_resident ? "n" : "y" },
       ],
       ([y, salary, other, income, tds, months, resident]) => {
-        if (!/^\s*\d{4}(-\d{2})?\s*$/.test(y)) return tr('"{text}" is not a tax year (e.g. 2026-27).', { text: ltr(y) });
+        if (D.parseYear(y, 4) === null) return tr('"{text}" is not a tax year (e.g. 2026-27).', { text: ltr(y) });
         for (const x of [salary, other, income, tds]) if (x.trim() && M.parse(x) === null) return tr('"{text}" is not an amount.', { text: ltr(x) });
         if (!salary.trim()) return "Enter the salary for the year.";
         if (months.trim() && !/^\s*([1-9]|1[0-2])\s*$/.test(months)) return "Months left is 1 to 12.";
@@ -886,7 +900,7 @@ export class SalaryTdsEstimateReport extends Report {
     if (!v) return false;
     const amount = (x: string) => (x.trim() ? M.toDecimal(M.parse(x)!) : "");
     this.input = {
-      tax_year: Number(v[0].trim().slice(0, 4)),
+      tax_year: D.parseYear(v[0], 4)!,
       salary: amount(v[1]),
       other_salary: amount(v[2]),
       other_income: amount(v[3]),

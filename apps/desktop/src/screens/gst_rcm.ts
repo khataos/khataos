@@ -26,6 +26,12 @@ function today(shell: Shell): string {
   return shell.company?.today ?? D.todayIso();
 }
 
+/** A GSTR-1 return month as "2026-09", typed so or as a month: "Sep", "Sep 2026", "last month". */
+function returnMonth(text: string): string | null {
+  const p = D.parsePeriod(text, D.todayIso());
+  return p && p.from.endsWith("-01") && p.to === D.addDays(D.addMonths(p.from, 1), -1) ? p.from.slice(0, 7) : null;
+}
+
 function monthStart(iso: string): string {
   return `${iso.slice(0, 8)}01`;
 }
@@ -441,11 +447,12 @@ export class Gstr1AmendmentsReport extends Report {
         { label: "Return period (YYYY-MM)", value: suggestion },
         { label: "Filed (Y) or clear (N)", value: "Y" },
       ],
-      ([p, f]) => (!/^\d{4}-\d{2}$/.test(p.trim()) ? tr('"{text}" is not a return period (YYYY-MM).', { text: p }) : /^[YyNn]$/.test(f.trim()) ? null : tr("Type Y or N.")),
+      ([p, f]) => (!returnMonth(p) ? tr('"{text}" is not a return period (YYYY-MM).', { text: p }) : /^[YyNn]$/.test(f.trim()) ? null : tr("Type Y or N.")),
+      { leave: (at, [p, f]) => (at === 0 && returnMonth(p) ? [returnMonth(p)!, f] : null) },
     );
     if (!v) return;
     try {
-      await gstAdvApi.markGstr1Filed(v[0].trim(), /^[Yy]$/.test(v[1].trim()));
+      await gstAdvApi.markGstr1Filed(returnMonth(v[0])!, /^[Yy]$/.test(v[1].trim()));
       await this.reload();
     } catch (e) {
       this.shell.error(e);

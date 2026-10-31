@@ -22,6 +22,7 @@ KhataOS is an independent project, not a copy of Tally, and it is not affiliated
 | Bill-wise details | A party line opens bill-wise details: new reference, against reference, advance, on account |
 | Drill down | `Enter` on a report row goes one level down, to the voucher in the end. `Esc` comes back to the same row |
 | Date and period | `F2` and `Alt+F2`, on the home menu (for the company) or in a report (for that report) |
+| Typing dates | Day first: `19`, `19-10`, `1-4-25`. A date without a year falls in the financial year. Also `t` today, `+1` next day, and periods in one field: `Apr`, `Q2`, `2026-27`, `FY27`, `AY 2027-28` ([Typing dates](reports.md#typing-dates)) |
 | Cancel and delete a voucher | `Alt+X` cancels and keeps the number; `Alt+D` deletes, after asking |
 | Detailed Stock Summary | `Alt+F5` (or `Alt+F1`) |
 | Company, import, exchange and share menus | `Alt+K`, `Alt+O`, `Alt+Z`, `Alt+M` |
