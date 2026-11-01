@@ -582,6 +582,8 @@ pre code { background: none; border: 0; padding: 0; font-size: 1em; }
 .hero .lede { margin-bottom: 32px; }
 .hero-note { margin-top: 18px; font-size: 0.9rem; color: var(--muted); max-width: 66ch; }
 .hero-note a { color: inherit; }
+.hero-ph { display: inline-block; margin-top: 18px; }
+.hero-ph img { display: block; }
 
 /* The key strip beside the hero text: what Tally users press every day. */
 .keys-card {
